@@ -60,7 +60,7 @@ Copy-Item .\compose\.env.example .\compose\.env
 
 - `GITHUB_TOKEN`
 - `OLLAMA_BASE_URL` 或 `OLLAMA_HOST`
-- `OLLAMA_MODEL`
+- `OLLAMA_MODEL_OVERRIDE`（可选，调试时才填写）
 - `POSTGRES_PASSWORD`
 - `N8N_BASIC_AUTH_PASSWORD`
 
@@ -72,8 +72,76 @@ Copy-Item .\compose\.env.example .\compose\.env
 ```powershell
 ollama serve
 ollama list
-ollama pull 你在compose\.env里写的模型名
+ollama pull qw-14b
 ```
+
+## 持久化角色模型（推荐）
+
+项目已支持基于 `qw-14b` 的 5 个持久化角色模型（见 `ollama/modelfiles/`）：
+
+- `gh-research-qw-14b`
+- `gh-games-qw-14b`
+- `gh-image-qw-14b`
+- `gh-video-qw-14b`
+- `gh-finance-qw-14b`
+
+先构建角色模型（Windows）：
+
+```powershell
+.\ollama\build-models.ps1
+```
+
+WSL/Linux/macOS：
+
+```bash
+bash ./ollama/build-models.sh
+```
+
+### 为什么用 Modelfile 持久化角色
+
+- 角色定义随模型别名保存，重启 Ollama 后仍可直接 `ollama run <alias>`
+- 避免每次请求拼大段临时 prompt，行为更稳定
+- 便于长期维护：角色调整集中在 `ollama/modelfiles/*.Modelfile`
+
+### 临时 prompt 覆盖 vs 持久角色
+
+- 持久角色：通过 Modelfile 固化“长期人格/风格/关注点”
+- 临时覆盖：通过环境变量或代码参数短期改写 system prompt，适合调试
+- 两者可叠加：默认走角色模型，必要时再临时覆盖
+
+### domain 自动选模型
+
+映射文件：`config/ollama_models.yaml`
+
+- `games -> gh-games-qw-14b`
+- `image-processing -> gh-image-qw-14b`
+- `short-video -> gh-video-qw-14b`
+- `finance -> gh-finance-qw-14b`
+- `infra -> gh-research-qw-14b`
+- `default -> gh-research-qw-14b`
+
+若某个 domain 未配置，自动回退到 `default`。
+
+### 如何切换默认模型
+
+直接修改 `config/ollama_models.yaml` 中的 `default` 即可。
+
+### 环境变量临时覆盖点
+
+- `OLLAMA_MODEL_OVERRIDE`：强制覆盖所有 domain 的模型（调试用，推荐）
+- `OLLAMA_MODEL`：历史兼容覆盖变量（不推荐长期使用）
+- `OLLAMA_SYSTEM_PROMPT`：临时覆盖 system prompt（调试用）
+- `OLLAMA_NUM_CTX` / `OLLAMA_TEMPERATURE` / `OLLAMA_TOP_P` / `OLLAMA_REPEAT_PENALTY`
+
+### 只想先用一个通用模型
+
+在 `compose/.env` 设置：
+
+```env
+OLLAMA_MODEL_OVERRIDE=gh-research-qw-14b
+```
+
+这样会覆盖 domain 映射，所有 domain 都走同一个通用模型。
 
 ## 第一次如何启动整套系统
 
@@ -101,6 +169,7 @@ docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml run --r
 2. 新建 `config/prompts/repo_summary_<new-domain>.md`
 3. 在 `github-watch/app/domain_rules/` 增加对应规则文件
 4. 如果需要更强输出，可在 exporter 层补该 domain 的特殊导出逻辑
+5. 若要独立角色模型，再增加 `ollama/modelfiles/` + `config/ollama_models.yaml` 映射
 
 当前实现是轻量 MVP，不需要新增服务，也不需要新增容器。
 

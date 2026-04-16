@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import os
 import socket
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -71,23 +74,50 @@ def _resolve_ollama_base_url() -> str:
     return "http://host.docker.internal:11434" if _is_running_in_container() else "http://127.0.0.1:11434"
 
 
+def _get_str_env(name: str, default: str) -> str:
+    value = os.getenv(name, "").strip()
+    return value if value else default
+
+
+def _get_int_env(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        LOGGER.warning("Invalid %s=%r, fallback to %s", name, raw, default)
+        return default
+
+
+def _get_float_env(name: str, default: float) -> float:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        LOGGER.warning("Invalid %s=%r, fallback to %s", name, raw, default)
+        return default
+
+
 def load_settings() -> Settings:
     config_root = Path(os.getenv("GITHUB_WATCH_CONFIG_DIR", "/app/config"))
     data_dir = Path(os.getenv("GITHUB_WATCH_DATA_DIR", "/data"))
     ollama_base = _resolve_ollama_base_url()
     return Settings(
         github_token=os.getenv("GITHUB_TOKEN", "").strip(),
-        github_api_base_url=os.getenv("GITHUB_API_BASE_URL", "https://api.github.com").strip(),
+        github_api_base_url=_get_str_env("GITHUB_API_BASE_URL", "https://api.github.com"),
         repos_dir=config_root / "repos",
         prompts_dir=config_root / "prompts",
         pipelines_file=config_root / "pipelines.yaml",
         data_dir=data_dir,
-        poll_interval_seconds=int(os.getenv("GITHUB_WATCH_POLL_INTERVAL_SECONDS", "86400")),
-        request_sleep_seconds=float(os.getenv("GITHUB_WATCH_REQUEST_SLEEP_SECONDS", "1")),
-        http_timeout_seconds=int(os.getenv("GITHUB_WATCH_HTTP_TIMEOUT_SECONDS", "30")),
-        max_retries=int(os.getenv("GITHUB_WATCH_MAX_RETRIES", "3")),
-        log_level=os.getenv("GITHUB_WATCH_LOG_LEVEL", "INFO").strip(),
+        poll_interval_seconds=_get_int_env("GITHUB_WATCH_POLL_INTERVAL_SECONDS", 86400),
+        request_sleep_seconds=_get_float_env("GITHUB_WATCH_REQUEST_SLEEP_SECONDS", 1.0),
+        http_timeout_seconds=_get_int_env("GITHUB_WATCH_HTTP_TIMEOUT_SECONDS", 30),
+        max_retries=_get_int_env("GITHUB_WATCH_MAX_RETRIES", 3),
+        log_level=_get_str_env("GITHUB_WATCH_LOG_LEVEL", "INFO"),
         ollama_base_url=ollama_base,
-        ollama_model=os.getenv("OLLAMA_MODEL", "qwen2.5-coder:14b-instruct-q4_K_M").strip(),
-        ollama_timeout_seconds=int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "120")),
+        ollama_model=_get_str_env("OLLAMA_MODEL", "gh-research-qw-14b"),
+        ollama_timeout_seconds=_get_int_env("OLLAMA_TIMEOUT_SECONDS", 120),
     )

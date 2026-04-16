@@ -17,7 +17,7 @@
 3. 拉取 commits / pull requests / issues
 4. 原始 JSON 按 domain 写入 `data/github-watch/raw/<domain>/`
 5. 规范化 JSON 按 domain 写入 `data/github-watch/normalized/<domain>/`
-6. 加载 `config/prompts/*.md` 生成 Ollama 提示词
+6. 按 domain 读取 `config/ollama_models.yaml` 自动选择 Ollama 模型，并加载 `config/prompts/*.md`
 7. 输出全局日报到 `reports/daily/`
 8. 输出按 domain 日报到 `reports/by-domain/`
 9. 预留 embeddings / training-samples exporter
@@ -32,8 +32,16 @@
 
 - 单仓库失败不影响整批任务
 - 仓库不存在、权限不足、GitHub API 异常只记录日志并继续
-- Ollama 失败时自动回退到基础文本摘要
+- Ollama 不可达、调用失败、或模型返回非法 JSON 时，自动回退到基础文本摘要
 - 没有 Qdrant 也不会阻断主流程
+
+## Ollama 角色模型说明
+
+- 推荐先在仓库根目录执行 `.\ollama\build-models.ps1` 构建 5 个持久化角色模型
+- domain 到模型映射在 `config/ollama_models.yaml`
+- `OLLAMA_MODEL_OVERRIDE` 环境变量可临时强制覆盖所有 domain 模型（调试用途，推荐）
+- `OLLAMA_MODEL` 仍保留历史兼容，但不建议长期使用
+- `OLLAMA_SYSTEM_PROMPT` 可临时覆盖 system prompt（调试用途）
 
 ## 手动运行（容器）
 
