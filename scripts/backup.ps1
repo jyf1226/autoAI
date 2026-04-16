@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $projectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $backupDir = Join-Path $projectRoot "backups"
-$zipPath = Join-Path $backupDir "github-game-research-backup-$timestamp.zip"
+$zipPath = Join-Path $backupDir "github-research-system-backup-$timestamp.zip"
 $stageDir = Join-Path $backupDir "stage-$timestamp"
 
 if (-not (Test-Path $backupDir)) {

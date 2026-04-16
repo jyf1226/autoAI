@@ -1,0 +1,7 @@
+domain: image-processing
+groups:
+  图像增强组:
+    - xinntao/Real-ESRGAN
+    - huggingface/diffusers
+  OCR与文档组:
+    - PaddlePaddle/PaddleOCR

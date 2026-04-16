@@ -1,6 +1,16 @@
-# GitHub 游戏项目自动研究系统（MVP）
+# 多领域 GitHub 研究系统（MVP）
 
-本项目用于在本地自动跟踪指定 GitHub 游戏仓库，抓取最近更新，生成中文日报，并为后续接入知识库 / Qdrant / 训练样本流程预留接口。
+这个仓库已经从“单一 games 的 GitHub 游戏项目自动研究系统”升级为“可扩展到多领域的 GitHub 研究系统 MVP”。
+
+当前依然保留一个统一的 `github-watch` 服务，但配置、prompt、规则和数据输出已经按 domain 分层，后续可以继续扩展新的研究领域。
+
+## 当前支持的 domain
+
+- `games`
+- `image-processing`
+- `short-video`
+- `finance`
+- `infra`
 
 ## 运行前提
 
@@ -14,103 +24,100 @@
 ```text
 .
 ├─ compose/
-│  ├─ docker-compose.yml
-│  ├─ .env.example
-│  └─ README.md
 ├─ config/
-│  └─ repos.yaml
+│  ├─ repos/
+│  ├─ prompts/
+│  └─ pipelines.yaml
 ├─ data/
-│  ├─ openwebui/
-│  ├─ qdrant/
-│  ├─ postgres/
-│  ├─ redis/
-│  ├─ n8n/
 │  └─ github-watch/
-│     ├─ raw/
-│     ├─ normalized/
-│     ├─ reports/
+│     ├─ raw/<domain>/
+│     ├─ normalized/<domain>/
+│     ├─ reports/daily/
+│     ├─ reports/weekly/
+│     ├─ reports/by-domain/
+│     ├─ embeddings/
+│     ├─ training-samples/
 │     └─ state/
 ├─ github-watch/
-│  ├─ app/
-│  ├─ requirements.txt
-│  ├─ Dockerfile
-│  └─ README.md
+│  └─ app/
+│     ├─ exporters/
+│     └─ domain_rules/
 ├─ scripts/
-│  ├─ start.ps1
-│  ├─ stop.ps1
-│  └─ backup.ps1
 ├─ start.ps1
 ├─ stop.ps1
 └─ backup.ps1
 ```
 
-## GitHub Token 配置
+## GitHub token 放哪
 
-1. 复制环境文件：
+先复制环境文件：
 
 ```powershell
 Copy-Item .\compose\.env.example .\compose\.env
 ```
 
-2. 编辑 `compose/.env`，至少修改：
-   - `GITHUB_TOKEN`
-   - `OLLAMA_BASE_URL`（或保留 `OLLAMA_BASE_URL` 为空并填写 `OLLAMA_HOST`）
-   - `OLLAMA_MODEL`（写本机 `ollama list` 能看到的模型名）
-   - `POSTGRES_PASSWORD`
-   - `N8N_BASIC_AUTH_PASSWORD`
+然后编辑 `compose/.env`，至少填写：
 
-## 宿主机 Ollama 启动
+- `GITHUB_TOKEN`
+- `OLLAMA_BASE_URL` 或 `OLLAMA_HOST`
+- `OLLAMA_MODEL`
+- `POSTGRES_PASSWORD`
+- `N8N_BASIC_AUTH_PASSWORD`
+
+## 宿主机 Ollama 怎么启动
 
 ```powershell
 ollama serve
+ollama list
+ollama pull 你在compose\.env里写的模型名
 ```
 
-可选拉模型：
-
-```powershell
-ollama pull qwen2.5-coder:14b-instruct-q4_K_M
-```
-
-## 第一次启动整套系统
+## 第一次如何启动整套系统
 
 ```powershell
 .\start.ps1
 ```
 
-## 只单独运行 github-watch
+## 如何只单独运行 github-watch
 
 ```powershell
 docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml run --rm github-watch python -m app.main
-docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml logs -f github-watch
 ```
 
-说明：即使 Ollama 不可用，`github-watch` 也会降级输出基础文本摘要；即使暂时不使用 Qdrant，也不影响 `github-watch` 最小流程产出日报。
+生成物重点看这里：
 
-## 每天定时跑
+- `data/github-watch/raw/<domain>/`
+- `data/github-watch/normalized/<domain>/`
+- `data/github-watch/reports/daily/`
+- `data/github-watch/reports/by-domain/`
+- `data/github-watch/state/`
+
+## 如何新增一个新的 domain
+
+1. 新建 `config/repos/<new-domain>.yaml`
+2. 新建 `config/prompts/repo_summary_<new-domain>.md`
+3. 在 `github-watch/app/domain_rules/` 增加对应规则文件
+4. 如果需要更强输出，可在 exporter 层补该 domain 的特殊导出逻辑
+
+当前实现是轻量 MVP，不需要新增服务，也不需要新增容器。
+
+## 如何每天定时跑
 
 推荐 Windows 任务计划程序，每天执行：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File E:\aiauto\start.ps1
-```
-
-如果你只想跑抓取，不希望常驻，可在任务计划中执行：
 
 ```powershell
 docker compose --env-file E:\aiauto\compose\.env -f E:\aiauto\compose\docker-compose.yml run --rm github-watch python -m app.main
 ```
 
-## 迁移到新机器
+## 如何迁移到新电脑
 
 1. 安装 Docker Desktop + WSL2 + Ollama
 2. 拷贝整个项目目录
-3. 恢复备份包（见下节）
-4. 重新填写新机器的 `compose/.env`
+3. 还原备份压缩包
+4. 重新填写 `compose/.env`
 5. 执行 `.\start.ps1`
 
-## 备份与必须保留目录
-
-强烈建议至少备份：
+## 哪些目录最重要必须备份
 
 - `compose/`
 - `config/`
@@ -127,6 +134,20 @@ docker compose --env-file E:\aiauto\compose\.env -f E:\aiauto\compose\docker-com
 .\backup.ps1
 ```
 
-## 关于异常仓库
+## 当前哪些 exporter 只是预留 stub
 
-如果某个仓库不存在、私有、或 API 异常，`github-watch` 会在日志和报告中记录错误，但不会中断整批任务。
+- `github-watch/app/exporters/qdrant_exporter.py`
+- `github-watch/app/exporters/training_exporter.py`
+
+当前只有 `markdown_exporter.py` 在实际输出链路中生效。
+
+## 容错说明
+
+- 某个 repo 不存在、重命名、权限不足、API 异常时，不会中断整批任务
+- Ollama 不可用时，会自动退回基础文本摘要
+- 没有 Qdrant / Postgres / Redis，也可以先只验证最小日报链路
+
+## 废弃说明
+
+- 旧的单文件 `config/repos.yaml` 已废弃，改为 `config/repos/*.yaml`
+- 旧的 `data/github-watch/raw/*.json` 与 `normalized/*.json` 顶层输出结构已废弃，改为按 domain 分目录

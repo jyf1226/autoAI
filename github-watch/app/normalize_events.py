@@ -12,6 +12,7 @@ def _labels(item: dict[str, Any]) -> list[str]:
 def normalize_repo_events(raw_events: dict[str, Any], fetched_at: str) -> dict[str, Any]:
     normalized = NormalizedRepoData(
         repo=raw_events.get("repo", ""),
+        domain=raw_events.get("domain", "unknown"),
         group=raw_events.get("group", "未分组"),
         fetched_at=fetched_at,
         time_range=TimeRange(

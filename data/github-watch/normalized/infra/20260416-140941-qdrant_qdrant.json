@@ -1,0 +1,562 @@
+{
+  "repo": "qdrant/qdrant",
+  "domain": "infra",
+  "group": "服务器与运维组",
+  "fetched_at": "2026-04-16T14:09:41Z",
+  "time_range": {
+    "start": "2026-04-15T14:09:41Z",
+    "end": "2026-04-16T14:09:41Z"
+  },
+  "commits": [],
+  "pull_requests": [
+    {
+      "id": 3539647169,
+      "number": 8695,
+      "title": "Fix clippy warnings for Rust 1.95",
+      "message": "No logic changes. Only resolves clippy warnings for Rust 1.95.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?",
+      "author": "timvisee",
+      "created_at": "2026-04-16T13:27:39Z",
+      "updated_at": "2026-04-16T13:44:00Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8695",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/collection/distance_matrix.rs",
+        "lib/collection/src/collection/query.rs",
+        "lib/collection/src/collection/search.rs",
+        "lib/collection/src/collection_manager/segments_searcher.rs",
+        "lib/collection/src/shards/local_shard/scroll.rs",
+        "lib/collection/src/shards/resolve.rs",
+        "lib/gridstore/benches/real_data_bench.rs",
+        "lib/quantization/src/encoded_vectors_u8.rs",
+        "lib/segment/src/index/query_estimator.rs",
+        "lib/shard/src/segment_holder/flush.rs",
+        "lib/sparse/src/index/inverted_index/inverted_index_ram.rs",
+        "lib/sparse/src/index/inverted_index/inverted_index_ram_builder.rs",
+        "lib/storage/src/content_manager/snapshots/recover.rs",
+        "lib/wal/src/lib.rs"
+      ],
+      "summary_text": "Fix clippy warnings for Rust 1.95\nNo logic changes. Only resolves clippy warnings for Rust 1.95.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?"
+    },
+    {
+      "id": 3539646906,
+      "number": 8694,
+      "title": "Apply new clippy lints for rust 1.95.0",
+      "message": "",
+      "author": "JojiiOfficial",
+      "created_at": "2026-04-16T13:27:35Z",
+      "updated_at": "2026-04-16T13:40:50Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8694",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/collection/distance_matrix.rs",
+        "lib/collection/src/collection/query.rs",
+        "lib/collection/src/collection/search.rs",
+        "lib/collection/src/collection_manager/segments_searcher.rs",
+        "lib/collection/src/shards/local_shard/scroll.rs",
+        "lib/collection/src/shards/resolve.rs",
+        "lib/quantization/src/encoded_vectors_u8.rs",
+        "lib/segment/src/index/query_estimator.rs",
+        "lib/shard/src/segment_holder/flush.rs",
+        "lib/sparse/src/index/inverted_index/inverted_index_ram.rs",
+        "lib/sparse/src/index/inverted_index/inverted_index_ram_builder.rs",
+        "lib/storage/src/content_manager/snapshots/recover.rs",
+        "lib/wal/src/lib.rs"
+      ],
+      "summary_text": "Apply new clippy lints for rust 1.95.0"
+    },
+    {
+      "id": 3538672359,
+      "number": 8690,
+      "title": "Clamp float32 cosine similarity to [-1.0, 1.0]",
+      "message": "Fixes #8688.\r\n\r\nPlain `f32` cosine can return a score slightly above `1.0`, which can let identical hits pass `score_threshold = 1.0`.\r\n\r\nThis clamps the `f32` cosine similarity to `[-1.0, 1.0]`. Generic score postprocessing stays unchanged, since multivector MaxSim can validly exceed `1.0`.\r\n\r\nAdds regression coverage for the self-score bound, the threshold case, and the multivector MaxSim guardrail.\r\n",
+      "author": "leohenon",
+      "created_at": "2026-04-16T09:48:51Z",
+      "updated_at": "2026-04-16T13:39:55Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8690",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/tests/shard_query.rs",
+        "lib/segment/src/spaces/simple.rs",
+        "lib/segment/src/vector_storage/query_scorer/mod.rs",
+        "lib/segment/tests/integration/exact_search_test.rs"
+      ],
+      "summary_text": "Clamp float32 cosine similarity to [-1.0, 1.0]\nFixes #8688.\r\n\r\nPlain `f32` cosine can return a score slightly above `1.0`, which can let identical hits pass `score_threshold = 1.0`.\r\n\r\nThis clamps the `f32` cosine similarity to `[-1.0, 1.0]`. Generic score postprocessing stays unchanged, since multivector MaxSim can validly exceed `1.0`.\r\n\r\nAdds regression coverage for the self-score bound, the threshold case, and the multivector MaxSim guardrail."
+    },
+    {
+      "id": 3539013045,
+      "number": 8691,
+      "title": "Interrupt subgraph_connectivity if it makes no progress",
+      "message": "  - Fix infinite loop in `GraphLayersBuilder::subgraph_connectivity` when the selected entry point has no outgoing links on any layer. `spent_budget` is only incremented while iterating a point's outgoing links,\r\n   so an isolated entry point leaves it stuck at `0` forever — the retry `loop` never observes `spent_budget > SUBGRAPH_CONNECTIVITY_SEARCH_BUDGET`. This was seen in production: the HNSW build thread spinning\r\n  inside `subgraph_connectivity` → `HNSWIndex::build` → `SegmentOptimizer::optimize`, which in turn blocked the consensus thread (`apply_entries` waiting on the collection lock held by the optimizer), hanging\r\n  the whole node.\r\n  - Break the retry loop when an iteration consumes zero budget. Sound because the graph is immutable across retries and the coin flip only gates *following* enumerated links, not *enumerating* them — if BFS\r\n  enumerated zero edges once, it will every time. Return value in that case is `1.0 / points.len()`, truthfully reflecting an isolated entry point.\r\n  - Add regression test `test_subgraph_connectivity_isolated_entry_point_does_not_hang`. Runs the call on a background thread with a 2s deadline so the test runner isn't wedged if the bug regresses. Fails in ~2s\r\n   on the old code, passes in ~0.02s with the fix.\r\n\r\n  ## Test plan\r\n\r\n  - [x] New regression test passes (`cargo test -p segment --lib test_subgraph_connectivity_isolated_entry_point_does_not_hang`)\r\n  - [x] Full `hnsw_index::` test suite passes (38/38), including `test_graph_connectivity` which exercises the normal, non-isolated path\r\n  - [ ] Manually verify on the affected deployment that optimizer-driven HNSW builds no longer hang",
+      "author": "agourlay",
+      "created_at": "2026-04-16T11:05:50Z",
+      "updated_at": "2026-04-16T13:29:08Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8691",
+      "labels": [],
+      "changed_files": [
+        "lib/segment/src/index/hnsw_index/graph_layers_builder.rs"
+      ],
+      "summary_text": "Interrupt subgraph_connectivity if it makes no progress\n  - Fix infinite loop in `GraphLayersBuilder::subgraph_connectivity` when the selected entry point has no outgoing links on any layer. `spent_budget` is only incremented while iterating a point's outgoing links,\r\n   so an isolated entry point leaves it stuck at `0` forever — the retry `loop` never observes `spent_budget > SUBGRAPH_CONNECTIVITY_SEARCH_BUDGET`. This was seen in production: the HNSW build thread spinning\r\n  inside `subgraph_connectivity` → `HNSWIndex::build` → `SegmentOptimizer::optimize`, which in turn blocked the consensus thread (`apply_entries` waiting on the collection lock held by the optimizer), hanging\r\n  the whole node.\r\n  - Break the retry loop when an iteration consumes zero budget. Sound because the graph is immutable across retries and the coin flip only gates *following* enumerated links, not *enumerating* them — if BFS\r\n  enumerated zero edges once, it will every time. Return value in that case is `1.0 / points.len()`, truthfully reflecting an isolated entry point.\r\n  - Add regression test `test_subgraph_connectivity_isolated_entry_point_does_not_hang`. Runs the call on a background thread with a 2s deadline so the test runner isn't wedged if the bug regresses. Fails in ~2s\r\n   on the old code, passes in ~0.02s with the fix.\r\n\r\n  ## Test plan\r\n\r\n  - [x] New regression test passes (`cargo test -p segment --lib test_subgraph_connectivity_isolated_entry_point_does_not_hang`)\r\n  - [x] Full `hnsw_index::` test suite passes (38/38), including `test_graph_connectivity` which exercises the normal, non-isolated path\r\n  - [ ] Manually verify on the affected deployment that optimizer-driven HNSW builds no longer hang"
+    },
+    {
+      "id": 3539631951,
+      "number": 8693,
+      "title": "Make subgraph_connectivity deterministic",
+      "message": "### All Submissions:\r\n\r\n* [ ] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [ ] Have you followed the guidelines in our Contributing document?\r\n* [ ] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?\r\n\r\n<!-- You can erase any parts of this template not applicable to your Pull Request. -->\r\n\r\n### New Feature Submissions:\r\n\r\n1. [ ] Does your submission pass tests?\r\n2. [ ] Have you formatted your code locally using `cargo +nightly fmt --all` command prior to submission?\r\n3. [ ] Have you checked your code using `cargo clippy --workspace --all-features` command?\r\n\r\n### Changes to Core Features:\r\n\r\n* [ ] Have you added an explanation of what your changes do and why you'd like us to include them?\r\n* [ ] Have you written new tests for your core changes, as applicable?\r\n* [ ] Have you successfully ran tests with your changes locally?\r\n",
+      "author": "agourlay",
+      "created_at": "2026-04-16T13:24:18Z",
+      "updated_at": "2026-04-16T13:24:18Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8693",
+      "labels": [],
+      "changed_files": [
+        "lib/segment/src/index/hnsw_index/graph_layers_builder.rs",
+        "lib/segment/src/index/hnsw_index/hnsw.rs"
+      ],
+      "summary_text": "Make subgraph_connectivity deterministic\n### All Submissions:\r\n\r\n* [ ] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [ ] Have you followed the guidelines in our Contributing document?\r\n* [ ] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?\r\n\r\n<!-- You can erase any parts of this template not applicable to your Pull Request. -->\r\n\r\n### New Feature Submissions:\r\n\r\n1. [ ] Does your submission pass tests?\r\n2. [ ] Have you formatted your code locally using `cargo +nightly fmt --all` command prior to submission?\r\n3. [ ] Have you checked your code using `cargo clippy --workspace --all-features` command?\r\n\r\n### Changes to Core Features:\r\n\r\n* [ ] Have you added an explanation of what your changes do and why you'd like us to include them?\r\n* [ ] Have you written new tests for your core changes, as applicable?\r\n* [ ] Have you successfully ran tests with your changes locally?"
+    },
+    {
+      "id": 3455821206,
+      "number": 8522,
+      "title": "test: add failing tests for non-idempotent resharding consensus ops",
+      "message": "## Summary\n\n- Adds 6 unit tests proving that resharding operations (`check_abort_resharding`, `commit_read_hashring`, `commit_write_hashring`, `check_finish_resharding`) return `BadRequest` errors when re-applied or when local state diverges between peers\n- Includes a divergence simulation test with two `ShardHolder` instances showing how Peer B's `BadRequest` error gets silently swallowed by `apply_entries`, causing permanent state divergence\n- **All 6 tests intentionally fail on `dev`** to demonstrate the bug; the fix PR stacked on top makes them pass\n\n## The bug\n\n`apply_entries` in `consensus_manager.rs` silently swallows all non-`ServiceError` results. Resharding validation returns `CollectionError::bad_request` which maps to `StorageError::BadRequest` (not `ServiceError`). If a peer's local state diverges for any reason (crash during partial apply, prior swallowed error), the same committed Raft entry returns `BadRequest` on that peer while succeeding on others — the error is silently swallowed, and resharding state permanently diverges despite identical consensus term/commit.\n\n## Test plan\n\nThese tests are expected to fail on this branch. The stacked fix PR will make them pass.\n\n\nMade with [Cursor](https://cursor.com)",
+      "author": "qdrant-cloud-bot",
+      "created_at": "2026-03-27T08:46:49Z",
+      "updated_at": "2026-04-16T13:24:03Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8522",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/collection/resharding.rs",
+        "lib/collection/src/shards/shard_holder/resharding.rs",
+        "tests/consensus_tests/test_resharding.py"
+      ],
+      "summary_text": "test: add failing tests for non-idempotent resharding consensus ops\n## Summary\n\n- Adds 6 unit tests proving that resharding operations (`check_abort_resharding`, `commit_read_hashring`, `commit_write_hashring`, `check_finish_resharding`) return `BadRequest` errors when re-applied or when local state diverges between peers\n- Includes a divergence simulation test with two `ShardHolder` instances showing how Peer B's `BadRequest` error gets silently swallowed by `apply_entries`, causing permanent state divergence\n- **All 6 tests intentionally fail on `dev`** to demonstrate the bug; the fix PR stacked on top makes them pass\n\n## The bug\n\n`apply_entries` in `consensus_manager.rs` silently swallows all non-`ServiceError` results. Resharding validation returns `CollectionError::bad_request` which maps to `StorageError::BadRequest` (not `ServiceError`). If a peer's local state diverges for any reason (crash during partial apply, prior swallowed error), the same committed Raft entry returns `BadRequest` on that peer while succeeding on others — the error is silently swallowed, and resharding state permanently diverges despite identical consensus term/commit.\n\n## Test plan\n\nThese tests are expected to fail on this branch. The stacked fix PR will make them pass.\n\n\nMade with [Cursor](https://cursor.com)"
+    },
+    {
+      "id": 3455835103,
+      "number": 8523,
+      "title": "fix: make resharding consensus operations idempotent",
+      "message": "Stacked on #8522 (test PR that reproduces the bug with 6 failing tests).\n\n## Summary\n\n- Makes all resharding consensus operations idempotent at the `ShardHolder` level: `check_abort_resharding`, `commit_read_hashring`, `commit_write_hashring`, `check_finish_resharding`, and `check_start_resharding` now return `Ok` when the desired post-condition is already met, instead of returning `BadRequest` errors that get silently swallowed by `apply_entries`\n- Adds defense-in-depth guards at the `Collection` level for `start_resharding`, `commit_read/write_hashring`, `finish_resharding`, and `abort_resharding`\n- All 6 tests from #8522 now pass, proving the fix prevents the state divergence\n\n## Root cause\n\n`apply_entries` in `consensus_manager.rs` classifies errors: `ServiceError` is fatal (stops consensus), everything else (including `BadRequest`) is silently swallowed and the entry is marked as applied. Resharding validation functions return `CollectionError::bad_request` which maps to `StorageError::BadRequest`. If a peer's local state diverges for any reason (crash during partial apply, prior swallowed error), the same committed Raft entry returns `BadRequest` on that peer while succeeding on others — causing permanent resharding state divergence despite identical consensus term/commit.\n\n## Changes\n\n**ShardHolder level** (`lib/collection/src/shards/shard_holder/resharding.rs`):\n- `check_abort_resharding`: return `Ok` when no resharding active or different resharding active (already aborted/handled)\n- `commit_read_hashring`: return `Ok` when no resharding or stage already at/past `ReadHashRingCommitted`\n- `commit_write_hashring`: return `Ok` when no resharding or stage already at/past `WriteHashRingCommitted`\n- `check_finish_resharding`: return `Ok` when no resharding active (already finished)\n- `check_start_resharding`: warn instead of error when shard already exists for Up direction (leftover from crashed previous attempt)\n\n**Collection level** (`lib/collection/src/collection/resharding.rs`):\n- `start_resharding`: return `Ok` if same resharding already in progress\n- `commit_read/write_hashring`: return `Ok` if no resharding or past target stage\n- `finish_resharding`: return `Ok` if no resharding active\n- `abort_resharding`: return `Ok` if no resharding active\n\n## Test plan\n\n- [x] All 6 tests from #8522 pass (were all failing before this fix)\n- [x] CI passes\n- [x] Manual cluster test: start resharding, kill a node mid-operation, restart and verify all nodes converge\n\n\nMade with [Cursor](https://cursor.com)",
+      "author": "qdrant-cloud-bot",
+      "created_at": "2026-03-27T08:50:29Z",
+      "updated_at": "2026-04-16T13:05:13Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8523",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/collection/resharding.rs",
+        "lib/collection/src/shards/shard_holder/resharding.rs",
+        "tests/consensus_tests/test_resharding.py"
+      ],
+      "summary_text": "fix: make resharding consensus operations idempotent\nStacked on #8522 (test PR that reproduces the bug with 6 failing tests).\n\n## Summary\n\n- Makes all resharding consensus operations idempotent at the `ShardHolder` level: `check_abort_resharding`, `commit_read_hashring`, `commit_write_hashring`, `check_finish_resharding`, and `check_start_resharding` now return `Ok` when the desired post-condition is already met, instead of returning `BadRequest` errors that get silently swallowed by `apply_entries`\n- Adds defense-in-depth guards at the `Collection` level for `start_resharding`, `commit_read/write_hashring`, `finish_resharding`, and `abort_resharding`\n- All 6 tests from #8522 now pass, proving the fix prevents the state divergence\n\n## Root cause\n\n`apply_entries` in `consensus_manager.rs` classifies errors: `ServiceError` is fatal (stops consensus), everything else (including `BadRequest`) is silently swallowed and the entry is marked as applied. Resharding validation functions return `CollectionError::bad_request` which maps to `StorageError::BadRequest`. If a peer's local state diverges for any reason (crash during partial apply, prior swallowed error), the same committed Raft entry returns `BadRequest` on that peer while succeeding on others — causing permanent resharding state divergence despite identical consensus term/commit.\n\n## Changes\n\n**ShardHolder level** (`lib/collection/src/shards/shard_holder/resharding.rs`):\n- `check_abort_resharding`: return `Ok` when no resharding active or different resharding active (already aborted/handled)\n- `commit_read_hashring`: return `Ok` when no resharding or stage already at/past `ReadHashRingCommitted`\n- `commit_write_hashring`: return `Ok` when no resharding or stage already at/past `WriteHashRingCommitted`\n- `check_finish_resharding`: return `Ok` when no resharding active (already finished)\n- `check_start_resharding`: warn instead of error when shard already exists for Up direction (leftover from crashed previous attempt)\n\n**Collection level** (`lib/collection/src/collection/resharding.rs`):\n- `start_resharding`: return `Ok` if same resharding already in progress\n- `commit_read/write_hashring`: return `Ok` if no resharding or past target stage\n- `finish_resharding`: return `Ok` if no resharding active\n- `abort_resharding`: return `Ok` if no resharding active\n\n## Test plan\n\n- [x] All 6 tests from #8522 pass (were all failing before this fix)\n- [x] CI passes\n- [x] Manual cluster test: start resharding, kill a node mid-operation, restart and verify all nodes converge\n\n\nMade with [Cursor](https://cursor.com)"
+    },
+    {
+      "id": 3528657129,
+      "number": 8674,
+      "title": "Reduce ImmutableGeoMapIndex RAM usage with RoaringBitmap",
+      "message": "Alternative to #8673 — minimal drop-in swap instead of a structural change.\n\n## Summary\n\n- Replace `AHashSet<PointOffsetType>` with `RoaringBitmap` in `ImmutableGeoMapIndex`'s `points_map` field\n- Each `AHashSet` carried ~64 bytes of stack overhead (32-byte `RandomState` + 32-byte `RawTable` metadata) plus hash-table heap allocations with control bytes\n- `RoaringBitmap` uses compressed bitmaps (~2 bytes/entry dense, sorted arrays ~4 bytes/entry sparse) with negligible fixed overhead\n- `roaring` is already a dependency used in `map_index`, `bool_index`, and `full_text_index`\n- Also replaced a transient `AHashSet<GeoHash>` in `decrement_hash_point_counts` with a `Vec` (always ≤13 elements)\n- Diff: 15 insertions, 20 deletions (vs 72/43 in #8673)\n\nNo on-disk format changes. No API changes. All behavior preserved.\n\n## Test plan\n\n- [x] All 34 geo index tests pass (`cargo test -p segment --features testing -- geo_index`)\n- [x] Full workspace builds\n- [x] `cargo fmt` check passes\n\nMade with [Cursor](https://cursor.com)",
+      "author": "qdrant-cloud-bot",
+      "created_at": "2026-04-14T13:43:36Z",
+      "updated_at": "2026-04-16T13:02:27Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8674",
+      "labels": [],
+      "changed_files": [
+        "lib/segment/src/index/field_index/geo_index/immutable_geo_index.rs"
+      ],
+      "summary_text": "Reduce ImmutableGeoMapIndex RAM usage with RoaringBitmap\nAlternative to #8673 — minimal drop-in swap instead of a structural change.\n\n## Summary\n\n- Replace `AHashSet<PointOffsetType>` with `RoaringBitmap` in `ImmutableGeoMapIndex`'s `points_map` field\n- Each `AHashSet` carried ~64 bytes of stack overhead (32-byte `RandomState` + 32-byte `RawTable` metadata) plus hash-table heap allocations with control bytes\n- `RoaringBitmap` uses compressed bitmaps (~2 bytes/entry dense, sorted arrays ~4 bytes/entry sparse) with negligible fixed overhead\n- `roaring` is already a dependency used in `map_index`, `bool_index`, and `full_text_index`\n- Also replaced a transient `AHashSet<GeoHash>` in `decrement_hash_point_counts` with a `Vec` (always ≤13 elements)\n- Diff: 15 insertions, 20 deletions (vs 72/43 in #8673)\n\nNo on-disk format changes. No API changes. All behavior preserved.\n\n## Test plan\n\n- [x] All 34 geo index tests pass (`cargo test -p segment --features testing -- geo_index`)\n- [x] Full workspace builds\n- [x] `cargo fmt` check passes\n\nMade with [Cursor](https://cursor.com)"
+    },
+    {
+      "id": 3539480189,
+      "number": 8692,
+      "title": "[WIP] TurboQuant basic Quantization + Encoding",
+      "message": "[WIP]\r\n\r\nImplements basic TurboQuant quantization (Cosine only).",
+      "author": "JojiiOfficial",
+      "created_at": "2026-04-16T12:51:32Z",
+      "updated_at": "2026-04-16T12:54:14Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8692",
+      "labels": [],
+      "changed_files": [
+        "lib/quantization/Cargo.toml",
+        "lib/quantization/benches/turboquant.rs",
+        "lib/quantization/src/turboquant/lloyd_max.rs",
+        "lib/quantization/src/turboquant/mod.rs",
+        "lib/quantization/src/turboquant/quantization.rs"
+      ],
+      "summary_text": "[WIP] TurboQuant basic Quantization + Encoding\n[WIP]\r\n\r\nImplements basic TurboQuant quantization (Cosine only)."
+    },
+    {
+      "id": 3523679976,
+      "number": 8656,
+      "title": "Queue proxy shard transfer uses pipelining",
+      "message": "  ## Summary\r\n\r\nDuring shard snapshot (and WAL delta) transfer, the backfill phase drains queued WAL operations to the remote via `transfer_all_missed_updates`.\r\n\r\nThe current implementation is fully sequential: \r\n- read a batch from WAL\r\n- send it over the network\r\n- wait for ACK\r\n- then read the next batch.\r\n\r\nThis PR overlaps WAL reads with network sends using `tokio::join!`; while the current batch is being sent to the remote, the next batch is prefetched from the WAL concurrently.\r\n\r\n This eliminates the WAL read latency between network round-trips.\r\n\r\n  ### Changes\r\n\r\n  - Split `transfer_wal_batch` into `read_wal_batch` and `send_wal_batch`\r\n  - Restructure `transfer_all_missed_updates` to pipeline non-last batches\r\n  - Last batch still acquires `update_lock` and re-reads WAL for correctness\r\n  - Cancel safety preserved (idempotent re-sends on retry)\r\n\r\n  ### Design\r\n\r\n  Before: READ₁ → SEND₁ → READ₂ → SEND₂ → ... → READ_N → SEND_N(last)\r\n  After:  READ₁ → [SEND₁ + READ₂] → [SEND₂ + READ₃] → ... → SEND_N(last)\r\n\r\nThe last batch is always handled under `update_lock` with a fresh WAL read to guarantee no writes are missed.\r\n\r\nPrefetched batches that appear to be \"last\" are discarded and re-read under the lock.\r\n\r\nPeak memory usage increases from ~1 to ~2 batch buffers (~64 MiB) during pipelined transfers.\r\n\r\n  ## Test plan\r\n\r\n  - [x] `cargo build -p collection`\r\n  - [x] `cargo test -p collection transfer`\r\n  - [x] Consensus integration tests (`test_shard_snapshot_transfer.py`)\r\n  - [ ] Performance benchmark",
+      "author": "agourlay",
+      "created_at": "2026-04-13T15:26:04Z",
+      "updated_at": "2026-04-16T10:32:30Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8656",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/shards/queue_proxy_shard.rs"
+      ],
+      "summary_text": "Queue proxy shard transfer uses pipelining\n  ## Summary\r\n\r\nDuring shard snapshot (and WAL delta) transfer, the backfill phase drains queued WAL operations to the remote via `transfer_all_missed_updates`.\r\n\r\nThe current implementation is fully sequential: \r\n- read a batch from WAL\r\n- send it over the network\r\n- wait for ACK\r\n- then read the next batch.\r\n\r\nThis PR overlaps WAL reads with network sends using `tokio::join!`; while the current batch is being sent to the remote, the next batch is prefetched from the WAL concurrently.\r\n\r\n This eliminates the WAL read latency between network round-trips.\r\n\r\n  ### Changes\r\n\r\n  - Split `transfer_wal_batch` into `read_wal_batch` and `send_wal_batch`\r\n  - Restructure `transfer_all_missed_updates` to pipeline non-last batches\r\n  - Last batch still acquires `update_lock` and re-reads WAL for correctness\r\n  - Cancel safety preserved (idempotent re-sends on retry)\r\n\r\n  ### Design\r\n\r\n  Before: READ₁ → SEND₁ → READ₂ → SEND₂ → ... → READ_N → SEND_N(last)\r\n  After:  READ₁ → [SEND₁ + READ₂] → [SEND₂ + READ₃] → ... → SEND_N(last)\r\n\r\nThe last batch is always handled under `update_lock` with a fresh WAL read to guarantee no writes are missed.\r\n\r\nPrefetched batches that appear to be \"last\" are discarded and re-read under the lock.\r\n\r\nPeak memory usage increases from ~1 to ~2 batch buffers (~64 MiB) during pipelined transfers.\r\n\r\n  ## Test plan\r\n\r\n  - [x] `cargo build -p collection`\r\n  - [x] `cargo test -p collection transfer`\r\n  - [x] Consensus integration tests (`test_shard_snapshot_transfer.py`)\r\n  - [ ] Performance benchmark"
+    },
+    {
+      "id": 3528413449,
+      "number": 8672,
+      "title": "TurboQuant Lloyd Max Codebook",
+      "message": "Depends on #8657 \r\n\r\nImplements Lloyd max algorithm and unit-test to verify hard-coded optimal codebook cluster.",
+      "author": "JojiiOfficial",
+      "created_at": "2026-04-14T12:52:00Z",
+      "updated_at": "2026-04-16T10:17:38Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8672",
+      "labels": [],
+      "changed_files": [
+        "lib/quantization/src/turboquant/lloyd_max.rs",
+        "lib/quantization/src/turboquant/mod.rs"
+      ],
+      "summary_text": "TurboQuant Lloyd Max Codebook\nDepends on #8657 \r\n\r\nImplements Lloyd max algorithm and unit-test to verify hard-coded optimal codebook cluster."
+    },
+    {
+      "id": 3534457368,
+      "number": 8686,
+      "title": "API Changes for TurboQuant",
+      "message": "Implements required API changes for TQ.\r\n\r\nExcluded in this PR:\r\n  - Edge\r\n  - OPs like loading/creating/... of Turboquant",
+      "author": "JojiiOfficial",
+      "created_at": "2026-04-15T14:23:46Z",
+      "updated_at": "2026-04-16T10:12:36Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8686",
+      "labels": [],
+      "changed_files": [
+        "docs/redoc/master/openapi.json",
+        "lib/api/build.rs",
+        "lib/api/src/grpc/conversions.rs",
+        "lib/api/src/grpc/proto/collections.proto",
+        "lib/api/src/grpc/qdrant.rs",
+        "lib/api/src/grpc/validate.rs",
+        "lib/collection/src/collection/collection_ops.rs",
+        "lib/collection/src/config.rs",
+        "lib/collection/src/operations/config_diff.rs",
+        "lib/collection/src/operations/conversions.rs",
+        "lib/edge/python/src/config/quantization.rs",
+        "lib/segment/src/compat.rs",
+        "lib/segment/src/types.rs",
+        "lib/segment/src/vector_storage/quantized/quantized_vectors.rs"
+      ],
+      "summary_text": "API Changes for TurboQuant\nImplements required API changes for TQ.\r\n\r\nExcluded in this PR:\r\n  - Edge\r\n  - OPs like loading/creating/... of Turboquant"
+    },
+    {
+      "id": 3523948316,
+      "number": 8657,
+      "title": "TurboQuant hadamard Rotation",
+      "message": "Implements Hadamard rotation required for the TurboQuant implementation.\r\n\r\n\r\n# Statistics\r\nBelow are two important statistics collected from dbpedia vectors, showing that the rotation from this PR properly relaxes the distributions.\r\n\r\n## Energy distribution\r\nMax component value of each vector. Rotated vectors are tightly clustered around 0.1, meaning that max values of the previously non-rotated vectors (blue) are properly distributed upon the other coordinates.\r\n\r\n<img width=\"1750\" height=\"1874\" alt=\"image\" src=\"https://github.com/user-attachments/assets/6e842f9d-99f4-414b-8d84-858f9dcbd6b1\" />\r\n\r\n## Excess Kurtosis\r\n\r\nMeasurement of how heavy-tailed / peaked the distribution of components is. Rotated vectors show a very small value, making the individual coordinates/components distribution much more uniform.\r\n\r\n<img width=\"1802\" height=\"1780\" alt=\"image\" src=\"https://github.com/user-attachments/assets/3c6e653d-1bc0-4f54-b739-48c752b2d8d8\" />\r\n\r\n# Performance\r\nPerformance of the current implementation (not vectorized with SIMD).\r\n\r\n<img width=\"1200\" height=\"750\" alt=\"image\" src=\"https://github.com/user-attachments/assets/0addc5e8-74db-42e0-ad2f-fbceeb356612\" />",
+      "author": "JojiiOfficial",
+      "created_at": "2026-04-13T16:21:56Z",
+      "updated_at": "2026-04-16T09:46:47Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8657",
+      "labels": [],
+      "changed_files": [
+        "lib/quantization/Cargo.toml",
+        "lib/quantization/benches/hadamard.rs",
+        "lib/quantization/src/turboquant/mod.rs",
+        "lib/quantization/src/turboquant/permutation.rs",
+        "lib/quantization/src/turboquant/rotation.rs"
+      ],
+      "summary_text": "TurboQuant hadamard Rotation\nImplements Hadamard rotation required for the TurboQuant implementation.\r\n\r\n\r\n# Statistics\r\nBelow are two important statistics collected from dbpedia vectors, showing that the rotation from this PR properly relaxes the distributions.\r\n\r\n## Energy distribution\r\nMax component value of each vector. Rotated vectors are tightly clustered around 0.1, meaning that max values of the previously non-rotated vectors (blue) are properly distributed upon the other coordinates.\r\n\r\n<img width=\"1750\" height=\"1874\" alt=\"image\" src=\"https://github.com/user-attachments/assets/6e842f9d-99f4-414b-8d84-858f9dcbd6b1\" />\r\n\r\n## Excess Kurtosis\r\n\r\nMeasurement of how heavy-tailed / peaked the distribution of components is. Rotated vectors show a very small value, making the individual coordinates/components distribution much more uniform.\r\n\r\n<img width=\"1802\" height=\"1780\" alt=\"image\" src=\"https://github.com/user-attachments/assets/3c6e653d-1bc0-4f54-b739-48c752b2d8d8\" />\r\n\r\n# Performance\r\nPerformance of the current implementation (not vectorized with SIMD).\r\n\r\n<img width=\"1200\" height=\"750\" alt=\"image\" src=\"https://github.com/user-attachments/assets/0addc5e8-74db-42e0-ad2f-fbceeb356612\" />"
+    },
+    {
+      "id": 3534912541,
+      "number": 8687,
+      "title": "Send batches from futures stream, use buffering to prefetch reads",
+      "message": "Improvement suggestion for <https://github.com/qdrant/qdrant/pull/8656>\r\n\r\nI find the branching in the original approach a little bit confusing.\r\n\r\nThis moves to a futures stream for reading batches, clearly separating the read and send stages. Buffering is used to prefetch reads.\r\n\r\nPlease feel free to pick which ever you like best.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?",
+      "author": "timvisee",
+      "created_at": "2026-04-15T16:00:40Z",
+      "updated_at": "2026-04-16T09:37:04Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8687",
+      "labels": [],
+      "changed_files": [
+        "Cargo.lock",
+        "lib/collection/Cargo.toml",
+        "lib/collection/src/shards/queue_proxy_shard.rs"
+      ],
+      "summary_text": "Send batches from futures stream, use buffering to prefetch reads\nImprovement suggestion for <https://github.com/qdrant/qdrant/pull/8656>\r\n\r\nI find the branching in the original approach a little bit confusing.\r\n\r\nThis moves to a futures stream for reading batches, clearly separating the read and send stages. Buffering is used to prefetch reads.\r\n\r\nPlease feel free to pick which ever you like best.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?"
+    },
+    {
+      "id": 3538386034,
+      "number": 8689,
+      "title": "Clean up temporary directories before loading collections",
+      "message": "## Summary\n\n- Move temp directory cleanup from `main.rs` (after `TableOfContent::new()`) into `TableOfContent::new()` itself, so it runs *before* collections are loaded and WAL is applied\n- Extract standalone `clear_tmp_directories(StorageConfig)` function that doesn't need a fully constructed `TableOfContent`\n- Existing `clear_all_tmp_directories(&self)` method now delegates to it\n\n## Motivation\n\nPreviously `clear_all_tmp_directories()` was called after `TableOfContent::new()` had already loaded all collections (including applying WAL). Stale temp files from a previous crash — e.g. interrupted snapshot transfers — could interfere with the recovery process. The cleanup now happens right after creating the storage/temp directories but before the collection loading loop.\n\n## Test plan\n\n- [x] `cargo check` passes\n- [ ] CI passes\n- [ ] Verify startup logs show collections loading after temp cleanup\n\nMade with [Cursor](https://cursor.com)",
+      "author": "qdrant-cloud-bot",
+      "created_at": "2026-04-16T08:47:34Z",
+      "updated_at": "2026-04-16T09:04:28Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8689",
+      "labels": [],
+      "changed_files": [
+        "lib/storage/src/content_manager/toc/mod.rs",
+        "lib/storage/src/content_manager/toc/temp_directories.rs",
+        "src/main.rs"
+      ],
+      "summary_text": "Clean up temporary directories before loading collections\n## Summary\n\n- Move temp directory cleanup from `main.rs` (after `TableOfContent::new()`) into `TableOfContent::new()` itself, so it runs *before* collections are loaded and WAL is applied\n- Extract standalone `clear_tmp_directories(StorageConfig)` function that doesn't need a fully constructed `TableOfContent`\n- Existing `clear_all_tmp_directories(&self)` method now delegates to it\n\n## Motivation\n\nPreviously `clear_all_tmp_directories()` was called after `TableOfContent::new()` had already loaded all collections (including applying WAL). Stale temp files from a previous crash — e.g. interrupted snapshot transfers — could interfere with the recovery process. The cleanup now happens right after creating the storage/temp directories but before the collection loading loop.\n\n## Test plan\n\n- [x] `cargo check` passes\n- [ ] CI passes\n- [ ] Verify startup logs show collections loading after temp cleanup\n\nMade with [Cursor](https://cursor.com)"
+    },
+    {
+      "id": 3529625342,
+      "number": 8678,
+      "title": "TQ variant for `QuantizedVectorStorage`",
+      "message": "This PR is a part of TQ integration.\r\n\r\nIt adds a new TQ variant for `QuantizedVectorStorage`.\r\n\r\nAlso, it adds a tmp GPU fallback. In case of TQ, we fallback to `f16` floats.\r\n\r\nOpen questions:\r\n- do we need to enable appendable TQ for each bits count?\r\n- do we need to rescore by default?",
+      "author": "IvanPleshkov",
+      "created_at": "2026-04-14T17:01:10Z",
+      "updated_at": "2026-04-16T08:53:17Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8678",
+      "labels": [],
+      "changed_files": [
+        "lib/segment/src/index/hnsw_index/gpu/gpu_vector_storage/mod.rs",
+        "lib/segment/src/vector_storage/quantized/quantized_scorer_builder.rs",
+        "lib/segment/src/vector_storage/quantized/quantized_vectors.rs"
+      ],
+      "summary_text": "TQ variant for `QuantizedVectorStorage`\nThis PR is a part of TQ integration.\r\n\r\nIt adds a new TQ variant for `QuantizedVectorStorage`.\r\n\r\nAlso, it adds a tmp GPU fallback. In case of TQ, we fallback to `f16` floats.\r\n\r\nOpen questions:\r\n- do we need to enable appendable TQ for each bits count?\r\n- do we need to rescore by default?"
+    },
+    {
+      "id": 3531289511,
+      "number": 8681,
+      "title": "simplify uio geo index",
+      "message": "This PR proposes an alternative to returning actual lazy iterators from payload indexes.\r\n\r\nReasons:\r\n\r\n- code is very complex. Auto-batching/chunking logic on top of CoWs e.t.c. makes it really hard to read or write UIO migrations for payload indexes.\r\n- Lazy iterators froces `Item=Result<...>`, which might be a performance concern, which affects all types of indexes, even in-memory ones\r\n- Pre-load is supposed to be better for latency. Lazy iterators are by definition doing sequential IO, and it requires a lot of extra processing to make this sequential IO efficient. With full prefetching - efficient  batched IO is easier. \r\n\r\n\r\n",
+      "author": "generall",
+      "created_at": "2026-04-15T00:46:25Z",
+      "updated_at": "2026-04-16T08:22:21Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8681",
+      "labels": [],
+      "changed_files": [
+        "lib/common/common/src/iterator_ext/mod.rs",
+        "lib/common/common/src/iterator_ext/ordering_iterator.rs",
+        "lib/common/common/src/universal_io/read.rs",
+        "lib/segment/src/index/field_index/bool_index/mod.rs",
+        "lib/segment/src/index/field_index/bool_index/mutable_bool_index.rs",
+        "lib/segment/src/index/field_index/field_index_base.rs",
+        "lib/segment/src/index/field_index/full_text_index/inverted_index/immutable_inverted_index.rs",
+        "lib/segment/src/index/field_index/full_text_index/inverted_index/mmap_inverted_index/mod.rs",
+        "lib/segment/src/index/field_index/full_text_index/inverted_index/mod.rs",
+        "lib/segment/src/index/field_index/full_text_index/inverted_index/mutable_inverted_index.rs",
+        "lib/segment/src/index/field_index/full_text_index/mutable_text_index.rs",
+        "lib/segment/src/index/field_index/full_text_index/tests/mod.rs",
+        "lib/segment/src/index/field_index/full_text_index/tests/test_congruence.rs",
+        "lib/segment/src/index/field_index/full_text_index/text_index.rs",
+        "lib/segment/src/index/field_index/geo_index/mmap_geo_index.rs",
+        "lib/segment/src/index/field_index/geo_index/mod.rs",
+        "lib/segment/src/index/field_index/map_index/mod.rs",
+        "lib/segment/src/index/field_index/null_index/mutable_null_index.rs",
+        "lib/segment/src/index/field_index/numeric_index/mod.rs",
+        "lib/segment/src/index/field_index/numeric_index/tests.rs",
+        "lib/segment/src/index/hnsw_index/hnsw.rs",
+        "lib/segment/src/index/hnsw_index/point_scorer.rs",
+        "lib/segment/src/index/plain_vector_index.rs",
+        "lib/segment/src/index/sparse_index/sparse_vector_index.rs",
+        "lib/segment/src/index/struct_payload_index.rs",
+        "lib/segment/src/segment/facet.rs",
+        "lib/segment/src/segment/order_by.rs",
+        "lib/segment/src/segment/sampling.rs",
+        "lib/segment/src/segment/scroll.rs",
+        "lib/segment/src/vector_storage/dense/dense_vector_storage.rs",
+        "lib/segment/src/vector_storage/tests/test_appendable_dense_vector_storage.rs",
+        "lib/segment/src/vector_storage/tests/test_appendable_multi_dense_vector_storage.rs",
+        "lib/segment/src/vector_storage/tests/test_appendable_sparse_vector_storage.rs"
+      ],
+      "summary_text": "simplify uio geo index\nThis PR proposes an alternative to returning actual lazy iterators from payload indexes.\r\n\r\nReasons:\r\n\r\n- code is very complex. Auto-batching/chunking logic on top of CoWs e.t.c. makes it really hard to read or write UIO migrations for payload indexes.\r\n- Lazy iterators froces `Item=Result<...>`, which might be a performance concern, which affects all types of indexes, even in-memory ones\r\n- Pre-load is supposed to be better for latency. Lazy iterators are by definition doing sequential IO, and it requires a lot of extra processing to make this sequential IO efficient. With full prefetching - efficient  batched IO is easier."
+    },
+    {
+      "id": 3529000027,
+      "number": 8675,
+      "title": "Use single read/send in loop, first iteration only reads",
+      "message": "Improvement suggestion for <https://github.com/qdrant/qdrant/pull/8656>\r\n\r\nI find the branching in the original approach a little bit confusing.\r\n\r\nThis changes the loop so that we have only one read and send implementation. The first loop iteration only reads (prefetches) and does not send.\r\n\r\nPlease feel free to pick which ever you like best.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?",
+      "author": "timvisee",
+      "created_at": "2026-04-14T14:46:55Z",
+      "updated_at": "2026-04-16T08:21:39Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8675",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/shards/queue_proxy_shard.rs"
+      ],
+      "summary_text": "Use single read/send in loop, first iteration only reads\nImprovement suggestion for <https://github.com/qdrant/qdrant/pull/8656>\r\n\r\nI find the branching in the original approach a little bit confusing.\r\n\r\nThis changes the loop so that we have only one read and send implementation. The first loop iteration only reads (prefetches) and does not send.\r\n\r\nPlease feel free to pick which ever you like best.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?"
+    },
+    {
+      "id": 3525379207,
+      "number": 8668,
+      "title": "[UIO] Explicit padding for numeric point",
+      "message": "We need to derive `bytemuck::Pod` for `Point<T>`, but doing so for a generic requires it to be `#[repr(C, packed)]`, which means we have to handle the padding ourselves.\r\n\r\nThis PR makes the padding part of the `Numericable` trait, and marks `Point<T>` as a `Pod` type. This enables it to be used in a `TypedStorage<Point<T>>`, which we need to migrate the mmap numeric index.",
+      "author": "coszio",
+      "created_at": "2026-04-13T21:57:56Z",
+      "updated_at": "2026-04-16T08:13:54Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8668",
+      "labels": [],
+      "changed_files": [
+        "lib/segment/src/index/field_index/histogram.rs",
+        "lib/segment/src/index/field_index/numeric_index/immutable_numeric_index.rs",
+        "lib/segment/src/index/field_index/numeric_index/mmap_numeric_index.rs",
+        "lib/segment/src/index/field_index/numeric_index/mutable_numeric_index.rs",
+        "lib/segment/src/index/field_index/tests/histogram_i64_tests.rs",
+        "lib/segment/src/index/field_index/tests/histogram_tests.rs"
+      ],
+      "summary_text": "[UIO] Explicit padding for numeric point\nWe need to derive `bytemuck::Pod` for `Point<T>`, but doing so for a generic requires it to be `#[repr(C, packed)]`, which means we have to handle the padding ourselves.\r\n\r\nThis PR makes the padding part of the `Numericable` trait, and marks `Point<T>` as a `Pod` type. This enables it to be used in a `TypedStorage<Point<T>>`, which we need to migrate the mmap numeric index."
+    },
+    {
+      "id": 3529353378,
+      "number": 8676,
+      "title": "feat/internal-grpc-auth",
+      "message": "### Cross-node JWT scenarios\r\n\r\n  | Scenario | Expected | Status |\r\n  |----------|----------|--------|\r\n  | Client → jwt(A) → Node(A,B) | ✅ Accept | ✅ `api_key` match |\r\n  | Client → jwt(A) → Node(A only) | ✅ Accept | ✅ `api_key` match |\r\n  | Client → jwt(B) → Node(A,B) | ✅ Accept | ✅ `alt_api_key` match |\r\n  | Client → jwt(B) → Node(A only, no B) | ❌ Reject | ✅ Correctly rejected |\r\n  | Node(A,B) → internal → Node(A only) | ✅ Accept | ✅ `PoolInterceptor` sends primary `api_key` (A), not B |\r\n\r\n\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?\r\n\r\n<!-- You can erase any parts of this template not applicable to your Pull Request. -->\r\n\r\n### New Feature Submissions:\r\n\r\n1. [x] Does your submission pass tests?\r\n2. [x] Have you formatted your code locally using `cargo +nightly fmt --all` command prior to submission?\r\n3. [x] Have you checked your code using `cargo clippy --workspace --all-features` command?\r\n\r\n### Changes to Core Features:\r\n\r\n* [ ] Have you added an explanation of what your changes do and why you'd like us to include them?\r\n* [ ] Have you written new tests for your core changes, as applicable?\r\n* [ ] Have you successfully ran tests with your changes locally?\r\n",
+      "author": "dancixx",
+      "created_at": "2026-04-14T15:58:02Z",
+      "updated_at": "2026-04-16T07:35:43Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8676",
+      "labels": [],
+      "changed_files": [
+        "lib/api/src/grpc/transport_channel_pool.rs",
+        "lib/collection/src/shards/channel_service.rs",
+        "lib/collection/src/shards/remote_shard.rs",
+        "src/consensus.rs",
+        "src/main.rs",
+        "src/tonic/api/collections_internal_api.rs",
+        "src/tonic/api/points_internal_api.rs",
+        "src/tonic/api/qdrant_internal_api.rs",
+        "src/tonic/api/update_common.rs",
+        "src/tonic/mod.rs"
+      ],
+      "summary_text": "feat/internal-grpc-auth\n### Cross-node JWT scenarios\r\n\r\n  | Scenario | Expected | Status |\r\n  |----------|----------|--------|\r\n  | Client → jwt(A) → Node(A,B) | ✅ Accept | ✅ `api_key` match |\r\n  | Client → jwt(A) → Node(A only) | ✅ Accept | ✅ `api_key` match |\r\n  | Client → jwt(B) → Node(A,B) | ✅ Accept | ✅ `alt_api_key` match |\r\n  | Client → jwt(B) → Node(A only, no B) | ❌ Reject | ✅ Correctly rejected |\r\n  | Node(A,B) → internal → Node(A only) | ✅ Accept | ✅ `PoolInterceptor` sends primary `api_key` (A), not B |\r\n\r\n\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?\r\n\r\n<!-- You can erase any parts of this template not applicable to your Pull Request. -->\r\n\r\n### New Feature Submissions:\r\n\r\n1. [x] Does your submission pass tests?\r\n2. [x] Have you formatted your code locally using `cargo +nightly fmt --all` command prior to submission?\r\n3. [x] Have you checked your code using `cargo clippy --workspace --all-features` command?\r\n\r\n### Changes to Core Features:\r\n\r\n* [ ] Have you added an explanation of what your changes do and why you'd like us to include them?\r\n* [ ] Have you written new tests for your core changes, as applicable?\r\n* [ ] Have you successfully ran tests with your changes locally?"
+    },
+    {
+      "id": 3198287185,
+      "number": 7966,
+      "title": "Introduce unquantized query encoding",
+      "message": "The idea is to use unquantized query vectors with binary encoded document vectors like [this](https://exa.ai/blog/building-web-scale-vector-db#:~:text=Keep%20using%20binary%20document%20embeddings%E2%80%94but%20for%20the%20query%20embedding%2C%20use%20uncompressed%20floating%2Dpoints). It leads to better recall. \r\n\r\nTo test I used our search quality panel in the web UI:\r\n\r\n```http\r\n// Configure query encoding config in BQ:\r\nPATCH /collections/benchmark\r\n{\r\n  \"quantization_config\": {\r\n    \"binary\": {\r\n      \"always_ram\": true,\r\n      \"query_encoding\": \"unquantized\" // default, unquantized\r\n    }\r\n  }\r\n}\r\n\r\n// Check precision using web UI\r\n{\r\n  \"limit\": 10,\r\n  \"params\": {\r\n    \"quantization\": {\r\n      \"ignore\": false, // true, false\r\n      \"oversampling\": 2 // 1, 2, 4\r\n    },\r\n    \"hnsw_ef\": 128\r\n  }\r\n}\r\n```\r\n\r\n## Without HNSW (indexing_threshold = 0)\r\n\r\n### Mean Precision@10\r\n\r\n| Quantization   | Oversampling | Mean P@10 |\r\n|----------------|--------------|-----------|\r\n| Ignore         | –            | 1.00      |\r\n| Default        | 1            | 0.20      |\r\n| Default        | 2            | 0.26      |\r\n| Default        | 4            | 0.36      |\r\n| Unquantized   | 1            | 0.42      |\r\n| Unquantized   | 2            | 0.57      |\r\n| Unquantized   | 4            | 0.68      |\r\n\r\n### Search Time\r\n\r\n| Quantization   | Oversampling | Exact (ms) | Regular (ms) |\r\n|----------------|--------------|------------|--------------|\r\n| Ignore         | –            | 87         | 90           |\r\n| Default        | 1            | 72         | 44           |\r\n| Default        | 2            | 73         | 39           |\r\n| Default        | 4            | 70         | 64           |\r\n| Unquantized   | 1            | 73         | 206          |\r\n| Unquantized   | 2            | 72         | 173          |\r\n| Unquantized   | 4            | 68         | 171          |\r\n\r\n## With HNSW\r\n\r\n### Mean Precision@10 (collection-level)\r\n\r\n### Mean Precision@10\r\n\r\n| Quantization   | Oversampling | Mean P@10 |\r\n|----------------|--------------|-----------|\r\n| Ignore         | –            | 0.36      |\r\n| Default        | 1            | 0.1857    |\r\n| Default        | 2            | 0.2556    |\r\n| Default        | 4            | 0.29      |\r\n| Unquantized   | 1            | 0.2571    |\r\n| Unquantized   | 2            | 0.275     |\r\n| Unquantized   | 4            | 0.2889    |\r\n\r\n### Search Time\r\n\r\n| Quantization   | Oversampling | Exact (ms) | Regular (ms) |\r\n|----------------|--------------|------------|--------------|\r\n| Ignore         | –            | 176        | 15           |\r\n| Default        | 1            | 170        | 10           |\r\n| Default        | 2            | 152        | 15           |\r\n| Default        | 4            | 154        | 10           |\r\n| Unquantized   | 1            | 190        | 21           |\r\n| Unquantized   | 2            | 204        | 30           |\r\n| Unquantized   | 4            | 224        | 28           |\r\n\r\n\r\n\r\n**Note:** Latency is poor as expected. I'll add perf optimizations using SIMD and a lookup table in the next PRs.\r\n\r\ntodo: \r\n- [ ] Switching from `query_encoding: default` to `query_encoding: unquantized` leads to re-indexing. But it's not really required.\r\n- [x] Error is thrown in collection `optimizer_status` instead of returning while user is trying to set unquantized query encoding with other distance metric (only cosine is allowed) or other document encoding config (only OneBit allowed)\r\n- [ ] Should we consider document vector BQ dim values as 0/1 OR -1/+1? Check precision with bfb experiments and maybe some real world datasets? ",
+      "author": "KShivendu",
+      "created_at": "2026-01-22T07:48:12Z",
+      "updated_at": "2026-04-15T20:07:52Z",
+      "url": "https://github.com/qdrant/qdrant/pull/7966",
+      "labels": [],
+      "changed_files": [
+        "docs/redoc/master/openapi.json",
+        "lib/api/src/grpc/conversions.rs",
+        "lib/api/src/grpc/proto/collections.proto",
+        "lib/api/src/grpc/qdrant.rs",
+        "lib/collection/src/collection/collection_ops.rs",
+        "lib/collection/src/operations/config_diff.rs",
+        "lib/edge/python/qdrant_edge.pyi",
+        "lib/edge/python/src/config/quantization.rs",
+        "lib/quantization/src/encoded_vectors_binary.rs",
+        "lib/quantization/tests/integration/test_binary.rs",
+        "lib/quantization/tests/integration/test_binary_encodings.rs",
+        "lib/segment/src/types.rs",
+        "lib/segment/src/vector_storage/quantized/quantized_vectors.rs"
+      ],
+      "summary_text": "Introduce unquantized query encoding\nThe idea is to use unquantized query vectors with binary encoded document vectors like [this](https://exa.ai/blog/building-web-scale-vector-db#:~:text=Keep%20using%20binary%20document%20embeddings%E2%80%94but%20for%20the%20query%20embedding%2C%20use%20uncompressed%20floating%2Dpoints). It leads to better recall. \r\n\r\nTo test I used our search quality panel in the web UI:\r\n\r\n```http\r\n// Configure query encoding config in BQ:\r\nPATCH /collections/benchmark\r\n{\r\n  \"quantization_config\": {\r\n    \"binary\": {\r\n      \"always_ram\": true,\r\n      \"query_encoding\": \"unquantized\" // default, unquantized\r\n    }\r\n  }\r\n}\r\n\r\n// Check precision using web UI\r\n{\r\n  \"limit\": 10,\r\n  \"params\": {\r\n    \"quantization\": {\r\n      \"ignore\": false, // true, false\r\n      \"oversampling\": 2 // 1, 2, 4\r\n    },\r\n    \"hnsw_ef\": 128\r\n  }\r\n}\r\n```\r\n\r\n## Without HNSW (indexing_threshold = 0)\r\n\r\n### Mean Precision@10\r\n\r\n| Quantization   | Oversampling | Mean P@10 |\r\n|----------------|--------------|-----------|\r\n| Ignore         | –            | 1.00      |\r\n| Default        | 1            | 0.20      |\r\n| Default        | 2            | 0.26      |\r\n| Default        | 4            | 0.36      |\r\n| Unquantized   | 1            | 0.42      |\r\n| Unquantized   | 2            | 0.57      |\r\n| Unquantized   | 4            | 0.68      |\r\n\r\n### Search Time\r\n\r\n| Quantization   | Oversampling | Exact (ms) | Regular (ms) |\r\n|----------------|--------------|------------|--------------|\r\n| Ignore         | –            | 87         | 90           |\r\n| Default        | 1            | 72         | 44           |\r\n| Default        | 2            | 73         | 39           |\r\n| Default        | 4            | 70         | 64           |\r\n| Unquantized   | 1            | 73         | 206          |\r\n| Unquantized   | 2            | 72         | 173          |\r\n| Unquantized   | 4            | 68         | 171          |\r\n\r\n## With HNSW\r\n\r\n### Mean Precision@10 (collection-level)\r\n\r\n### Mean Precision@10\r\n\r\n| Quantization   | Oversampling | Mean P@10 |\r\n|----------------|--------------|-----------|\r\n| Ignore         | –            | 0.36      |\r\n| Default        | 1            | 0.1857    |\r\n| Default        | 2            | 0.2556    |\r\n| Default        | 4            | 0.29      |\r\n| Unquantized   | 1            | 0.2571    |\r\n| Unquantized   | 2            | 0.275     |\r\n| Unquantized   | 4            | 0.2889    |\r\n\r\n### Search Time\r\n\r\n| Quantization   | Oversampling | Exact (ms) | Regular (ms) |\r\n|----------------|--------------|------------|--------------|\r\n| Ignore         | –            | 176        | 15           |\r\n| Default        | 1            | 170        | 10           |\r\n| Default        | 2            | 152        | 15           |\r\n| Default        | 4            | 154        | 10           |\r\n| Unquantized   | 1            | 190        | 21           |\r\n| Unquantized   | 2            | 204        | 30           |\r\n| Unquantized   | 4            | 224        | 28           |\r\n\r\n\r\n\r\n**Note:** Latency is poor as expected. I'll add perf optimizations using SIMD and a lookup table in the next PRs.\r\n\r\ntodo: \r\n- [ ] Switching from `query_encoding: default` to `query_encoding: unquantized` leads to re-indexing. But it's not really required.\r\n- [x] Error is thrown in collection `optimizer_status` instead of returning while user is trying to set unquantized query encoding with other distance metric (only cosine is allowed) or other document encoding config (only OneBit allowed)\r\n- [ ] Should we consider document vector BQ dim values as 0/1 OR -1/+1? Check precision with bfb experiments and maybe some real world datasets?"
+    },
+    {
+      "id": 3534111828,
+      "number": 8685,
+      "title": "Remove `AsyncRawScorer`",
+      "message": "This PR refactors `ImmutableDenseVectors` and `DenseVectorStorageImpl`, so that default `RawScorerImpl` correctly uses io_uring, and we can get rid of `AsyncRawScorerImpl`.\r\n\r\nI've tested all changes against `scorer_mmap`/`vector_search` benchmark, no noticeable impact on performance as far as I can tell.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?\r\n\r\n### New Feature Submissions:\r\n\r\n1. [ ] Does your submission pass tests?\r\n2. [x] Have you formatted your code locally using `cargo +nightly fmt --all` command prior to submission?\r\n3. [x] Have you checked your code using `cargo clippy --workspace --all-features` command?\r\n\r\n### Changes to Core Features:\r\n\r\n* [x] Have you added an explanation of what your changes do and why you'd like us to include them?\r\n* [ ] Have you written new tests for your core changes, as applicable?\r\n* [ ] Have you successfully ran tests with your changes locally?\r\n",
+      "author": "ffuugoo",
+      "created_at": "2026-04-15T13:15:58Z",
+      "updated_at": "2026-04-15T17:11:06Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8685",
+      "labels": [],
+      "changed_files": [
+        "lib/common/common/src/universal_io/disk_cache/mod.rs",
+        "lib/common/common/src/universal_io/io_uring/mod.rs",
+        "lib/common/common/src/universal_io/mmap.rs",
+        "lib/common/common/src/universal_io/mod.rs",
+        "lib/common/common/src/universal_io/read.rs",
+        "lib/common/common/src/universal_io/wrappers/read_only.rs",
+        "lib/common/common/src/universal_io/wrappers/typed.rs",
+        "lib/segment/Cargo.toml",
+        "lib/segment/benches/scorer_mmap.rs",
+        "lib/segment/benches/vector_search.rs",
+        "lib/segment/src/vector_storage/async_raw_scorer.rs",
+        "lib/segment/src/vector_storage/chunked_vectors.rs",
+        "lib/segment/src/vector_storage/dense/dense_vector_storage.rs",
+        "lib/segment/src/vector_storage/dense/immutable_dense_vectors.rs",
+        "lib/segment/src/vector_storage/mod.rs",
+        "lib/segment/src/vector_storage/query_scorer/custom_query_scorer.rs",
+        "lib/segment/src/vector_storage/query_scorer/metric_query_scorer.rs",
+        "lib/segment/src/vector_storage/query_scorer/mod.rs",
+        "lib/segment/src/vector_storage/query_scorer/multi_custom_query_scorer.rs",
+        "lib/segment/src/vector_storage/query_scorer/multi_metric_query_scorer.rs",
+        "lib/segment/src/vector_storage/query_scorer/sparse_metric_query_scorer.rs",
+        "lib/segment/src/vector_storage/raw_scorer.rs"
+      ],
+      "summary_text": "Remove `AsyncRawScorer`\nThis PR refactors `ImmutableDenseVectors` and `DenseVectorStorageImpl`, so that default `RawScorerImpl` correctly uses io_uring, and we can get rid of `AsyncRawScorerImpl`.\r\n\r\nI've tested all changes against `scorer_mmap`/`vector_search` benchmark, no noticeable impact on performance as far as I can tell.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?\r\n\r\n### New Feature Submissions:\r\n\r\n1. [ ] Does your submission pass tests?\r\n2. [x] Have you formatted your code locally using `cargo +nightly fmt --all` command prior to submission?\r\n3. [x] Have you checked your code using `cargo clippy --workspace --all-features` command?\r\n\r\n### Changes to Core Features:\r\n\r\n* [x] Have you added an explanation of what your changes do and why you'd like us to include them?\r\n* [ ] Have you written new tests for your core changes, as applicable?\r\n* [ ] Have you successfully ran tests with your changes locally?"
+    },
+    {
+      "id": 3510919381,
+      "number": 8641,
+      "title": "[UIO] Migrate numeric index",
+      "message": "Builds on top of #8668 \r\n\r\nMigrates the numeric index to use universal io infrastructure.\r\n\r\nSpecifically, it finishes the migration of `pairs` and `deleted` fields.\r\n",
+      "author": "coszio",
+      "created_at": "2026-04-09T21:50:04Z",
+      "updated_at": "2026-04-15T14:44:24Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8641",
+      "labels": [],
+      "changed_files": [
+        "lib/segment/src/index/field_index/field_index_base.rs",
+        "lib/segment/src/index/field_index/numeric_index/mmap_numeric_index.rs",
+        "lib/segment/src/index/field_index/numeric_index/mod.rs",
+        "lib/segment/src/index/field_index/numeric_index/tests.rs",
+        "lib/segment/src/segment/order_by.rs"
+      ],
+      "summary_text": "[UIO] Migrate numeric index\nBuilds on top of #8668 \r\n\r\nMigrates the numeric index to use universal io infrastructure.\r\n\r\nSpecifically, it finishes the migration of `pairs` and `deleted` fields."
+    }
+  ],
+  "issues": [
+    {
+      "id": 4276224276,
+      "number": 8696,
+      "title": "Running qdrant.exe causes folders to be created at various places depending on where qdrant.exe is run",
+      "message": "<!--- Provide a general summary of the issue in the Title above -->\nDue to licensing requirements, I am not allowed to use Docker (Desktop) at my workplace and it has lead to me using the executable versions of Qdrant that are present within the ZIP files. The executable works as expected, but I have noticed that when I am calling qdrant.exe, then you create different data path directories at different places depending on where you make the call to qdrant.exe and when you let e.g. Kilo Code to utilize the running Qdrant instance for local codebase indexing, it causes re-indexing if one would run the qdrant.exe at different locations on the machine due to e.g. Kilo Code's detection of present chunks/embeddings in those surrounding folders.\n\n## Current Behavior\n<!--- Tell us what happens instead of the expected behavior -->\nInstead of the Qdrant instance pointing to a specific location where data is stored on the system, it will just create data directories at the same location where the qdrant.exe is run.\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Download any ZIP file\n2. Unzip the file and get access to qdrant.exe\n3. Run qdrant.exe at one place and observe folders being created around qdrant.exe\n4. Run qdrant.exe at another location and new folders will be created\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nN/A\n\n## Expected Behavior\nSee above.\n\n## Possible Solution\nI have developed the following installation Powershell script to make the path of directories static on one's machine and it won't matter from where in a terminal you run the qdrant instance, it will eliminate the risk of duplicate data directories being created:\n\n```powershell\n# =====================================================\n# Qdrant installer (Windows, PATH wrapper in ~/qdrant/bin)\n# =====================================================\n\n# -------------------------------\n# Configuration\n# -------------------------------\n$QdrantDir = Join-Path $HOME \"qdrant\"\n$QdrantBin = Join-Path $QdrantDir \"bin\"\n\n$QdrantUrl = \"https://github.com/qdrant/qdrant/releases/download/v1.16.3/qdrant-x86_64-pc-windows-msvc.zip\"\n$ZipPath   = Join-Path $QdrantDir \"qdrant.zip\"\n\n$CmdPath   = Join-Path $QdrantBin \"qdrant.cmd\"\n\nWrite-Host \"=== Qdrant installation started ===\" -ForegroundColor Cyan\nWrite-Host \"Install dir : $QdrantDir\"\nWrite-Host \"Bin dir     : $QdrantBin\"\nWrite-Host \"\"\n\n# -------------------------------\n# 1. Install Qdrant\n# -------------------------------\nWrite-Host \"[1/4] Preparing installation directory...\"\nRemove-Item $QdrantDir -Recurse -Force -ErrorAction SilentlyContinue\nNew-Item -ItemType Directory -Path $QdrantDir -Force | Out-Null\nNew-Item -ItemType Directory -Path $QdrantBin -Force | Out-Null\n\nWrite-Host \"[2/4] Downloading Qdrant...\"\nInvoke-WebRequest -Uri $QdrantUrl -OutFile $ZipPath\n\nWrite-Host \"[3/4] Extracting Qdrant...\"\nExpand-Archive -Path $ZipPath -DestinationPath $QdrantDir -Force\nRemove-Item $ZipPath -Force\n\nif (!(Test-Path (Join-Path $QdrantDir \"qdrant.exe\"))) {\n    Write-Error \"qdrant.exe not found after extraction\"\n    exit 1\n}\n\nWrite-Host \"Qdrant installed at $QdrantDir\"\nWrite-Host \"\"\n\n# -------------------------------\n# 2. Install PATH wrapper (inside qdrant/bin)\n# -------------------------------\nWrite-Host \"[4/4] Creating qdrant.cmd wrapper...\"\n\n@'\n@echo off\nsetlocal\n\nset QDRANT_HOME=%USERPROFILE%\\qdrant\n\nif not exist \"%QDRANT_HOME%\\qdrant.exe\" (\n    echo ERROR: qdrant.exe not found in %QDRANT_HOME%\n    exit /b 1\n)\n\ncd /d \"%QDRANT_HOME%\"\n\"%QDRANT_HOME%\\qdrant.exe\" %*\n\nendlocal\n'@ | Set-Content -Path $CmdPath -Encoding ASCII\n\nWrite-Host \"Wrapper created: $CmdPath\"\n\n# -------------------------------\n# 3. Ensure ~/qdrant/bin is on PATH\n# -------------------------------\n$UserPath = [Environment]::GetEnvironmentVariable(\"Path\", \"User\")\n\nif ($UserPath -notlike \"*$QdrantBin*\") {\n    [Environment]::SetEnvironmentVariable(\n        \"Path\",\n        \"$UserPath;$QdrantBin\",\n        \"User\"\n    )\n    Write-Host \"Added $QdrantBin to user PATH\"\n    Write-Host \"Restart your shell to activate 'qdrant'\"\n} else {\n    Write-Host \"$QdrantBin already present in PATH\"\n}\n\nWrite-Host \"\"\nWrite-Host \"=== Qdrant installation completed successfully ===\" -ForegroundColor Green\nWrite-Host \"Run: qdrant\"\nWrite-Host \"Working directory: $QdrantDir\"\n```\n\n## Context (Environment)\nSee above.\n\n## Detailed Description\nSee above.\n\n## Possible Implementation\nThe above script should work well for Windows machines, but I have not figured out anything similar for Linux/MacOS machines, so I guess this part is pretty much open for further discussion on how we could utilize this script for greater audience and more machines that it could work on.",
+      "author": "sylwester-liljegren",
+      "created_at": "2026-04-16T13:59:50Z",
+      "updated_at": "2026-04-16T13:59:50Z",
+      "url": "https://github.com/qdrant/qdrant/issues/8696",
+      "labels": [
+        "bug"
+      ],
+      "changed_files": [],
+      "summary_text": "Running qdrant.exe causes folders to be created at various places depending on where qdrant.exe is run\n<!--- Provide a general summary of the issue in the Title above -->\nDue to licensing requirements, I am not allowed to use Docker (Desktop) at my workplace and it has lead to me using the executable versions of Qdrant that are present within the ZIP files. The executable works as expected, but I have noticed that when I am calling qdrant.exe, then you create different data path directories at different places depending on where you make the call to qdrant.exe and when you let e.g. Kilo Code to utilize the running Qdrant instance for local codebase indexing, it causes re-indexing if one would run the qdrant.exe at different locations on the machine due to e.g. Kilo Code's detection of present chunks/embeddings in those surrounding folders.\n\n## Current Behavior\n<!--- Tell us what happens instead of the expected behavior -->\nInstead of the Qdrant instance pointing to a specific location where data is stored on the system, it will just create data directories at the same location where the qdrant.exe is run.\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Download any ZIP file\n2. Unzip the file and get access to qdrant.exe\n3. Run qdrant.exe at one place and observe folders being created around qdrant.exe\n4. Run qdrant.exe at another location and new folders will be created\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nN/A\n\n## Expected Behavior\nSee above.\n\n## Possible Solution\nI have developed the following installation Powershell script to make the path of directories static on one's machine and it won't matter from where in a terminal you run the qdrant instance, it will eliminate the risk of duplicate data directories being created:\n\n```powershell\n# =====================================================\n# Qdrant installer (Windows, PATH wrapper in ~/qdrant/bin)\n# =====================================================\n\n# -------------------------------\n# Configuration\n# -------------------------------\n$QdrantDir = Join-Path $HOME \"qdrant\"\n$QdrantBin = Join-Path $QdrantDir \"bin\"\n\n$QdrantUrl = \"https://github.com/qdrant/qdrant/releases/download/v1.16.3/qdrant-x86_64-pc-windows-msvc.zip\"\n$ZipPath   = Join-Path $QdrantDir \"qdrant.zip\"\n\n$CmdPath   = Join-Path $QdrantBin \"qdrant.cmd\"\n\nWrite-Host \"=== Qdrant installation started ===\" -ForegroundColor Cyan\nWrite-Host \"Install dir : $QdrantDir\"\nWrite-Host \"Bin dir     : $QdrantBin\"\nWrite-Host \"\"\n\n# -------------------------------\n# 1. Install Qdrant\n# -------------------------------\nWrite-Host \"[1/4] Preparing installation directory...\"\nRemove-Item $QdrantDir -Recurse -Force -ErrorAction SilentlyContinue\nNew-Item -ItemType Directory -Path $QdrantDir -Force | Out-Null\nNew-Item -ItemType Directory -Path $QdrantBin -Force | Out-Null\n\nWrite-Host \"[2/4] Downloading Qdrant...\"\nInvoke-WebRequest -Uri $QdrantUrl -OutFile $ZipPath\n\nWrite-Host \"[3/4] Extracting Qdrant...\"\nExpand-Archive -Path $ZipPath -DestinationPath $QdrantDir -Force\nRemove-Item $ZipPath -Force\n\nif (!(Test-Path (Join-Path $QdrantDir \"qdrant.exe\"))) {\n    Write-Error \"qdrant.exe not found after extraction\"\n    exit 1\n}\n\nWrite-Host \"Qdrant installed at $QdrantDir\"\nWrite-Host \"\"\n\n# -------------------------------\n# 2. Install PATH wrapper (inside qdrant/bin)\n# -------------------------------\nWrite-Host \"[4/4] Creating qdrant.cmd wrapper...\"\n\n@'\n@echo off\nsetlocal\n\nset QDRANT_HOME=%USERPROFILE%\\qdrant\n\nif not exist \"%QDRANT_HOME%\\qdrant.exe\" (\n    echo ERROR: qdrant.exe not found in %QDRANT_HOME%\n    exit /b 1\n)\n\ncd /d \"%QDRANT_HOME%\"\n\"%QDRANT_HOME%\\qdrant.exe\" %*\n\nendlocal\n'@ | Set-Content -Path $CmdPath -Encoding ASCII\n\nWrite-Host \"Wrapper created: $CmdPath\"\n\n# -------------------------------\n# 3. Ensure ~/qdrant/bin is on PATH\n# -------------------------------\n$UserPath = [Environment]::GetEnvironmentVariable(\"Path\", \"User\")\n\nif ($UserPath -notlike \"*$QdrantBin*\") {\n    [Environment]::SetEnvironmentVariable(\n        \"Path\",\n        \"$UserPath;$QdrantBin\",\n        \"User\"\n    )\n    Write-Host \"Added $QdrantBin to user PATH\"\n    Write-Host \"Restart your shell to activate 'qdrant'\"\n} else {\n    Write-Host \"$QdrantBin already present in PATH\"\n}\n\nWrite-Host \"\"\nWrite-Host \"=== Qdrant installation completed successfully ===\" -ForegroundColor Green\nWrite-Host \"Run: qdrant\"\nWrite-Host \"Working directory: $QdrantDir\"\n```\n\n## Context (Environment)\nSee above.\n\n## Detailed Description\nSee above.\n\n## Possible Implementation\nThe above script should work well for Windows machines, but I have not figured out anything similar for Linux/MacOS machines, so I guess this part is pretty much open for further discussion on how we could utilize this script for greater audience and more machines that it could work on."
+    },
+    {
+      "id": 2881790219,
+      "number": 6070,
+      "title": "Flaky test `tests::hw_metrics::test_hw_metrics_cancellation`",
+      "message": "## Last report\n\n### System error\n\n```text\nthread 'tests::hw_metrics::test_hw_metrics_cancellation' (99679) panicked at lib/collection/src/tests/hw_metrics.rs:110:9:\nTimeout waiting for cancellation metrics to be drained\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n```\n\n### Context\n\nDate: 16.04.2026 13:55\n\n[Flaky failure run](https://github.com/qdrant/qdrant/actions/runs/24512979140/job/process-results)\n\n[Commit](https://github.com/qdrant/qdrant/tree/d94430ae91abd6ad8bc884c2a06fe6fbe433e4a5)\n\nOS: macos-latest\n\nBranch: refs/heads/dev\n\n#\n",
+      "author": "github-actions[bot]",
+      "created_at": "2025-02-26T14:21:15Z",
+      "updated_at": "2026-04-16T13:55:30Z",
+      "url": "https://github.com/qdrant/qdrant/issues/6070",
+      "labels": [],
+      "changed_files": [],
+      "summary_text": "Flaky test `tests::hw_metrics::test_hw_metrics_cancellation`\n## Last report\n\n### System error\n\n```text\nthread 'tests::hw_metrics::test_hw_metrics_cancellation' (99679) panicked at lib/collection/src/tests/hw_metrics.rs:110:9:\nTimeout waiting for cancellation metrics to be drained\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n```\n\n### Context\n\nDate: 16.04.2026 13:55\n\n[Flaky failure run](https://github.com/qdrant/qdrant/actions/runs/24512979140/job/process-results)\n\n[Commit](https://github.com/qdrant/qdrant/tree/d94430ae91abd6ad8bc884c2a06fe6fbe433e4a5)\n\nOS: macos-latest\n\nBranch: refs/heads/dev\n\n#"
+    },
+    {
+      "id": 4273017859,
+      "number": 8688,
+      "title": "[Bug]: Cosine similarity score strictly exceeds upper bound of 1.0 for identical vectors",
+      "message": "<!--- Tell us what happens instead of the expected behavior -->\nWhen using the `COSINE` distance metric, searching for a vector that is identical to an inserted vector occasionally returns a similarity score strictly greater than `1.0` (e.g., `1.0000001` or similar).\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Create a collection using `Distance.COSINE`.\n2. Generate a random `float32` vector array (e.g. 128 dimensions).\n3. Upsert this point into the collection.\n4. Query the collection using `client.search` with the exact same vector.\n5. In certain cases, the returned score will exceed the maximum bound of `1.0`.\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nHere is a minimal reproducible Python script (`qdrant-client`) that loops until the bug is triggered (usually within a few iterations):\n\n```python\nfrom qdrant_client import QdrantClient, models\nimport numpy as np\n\nclient = QdrantClient(url=\"http://localhost:6333\")\n\ncollection_name = \"test_cosine_bound\"\n\n# Ensure clean state\nif client.collection_exists(collection_name):\n    client.delete_collection(collection_name)\n\n# Create collection with Cosine metric\nclient.create_collection(\n    collection_name=collection_name,\n    vectors_config=models.VectorParams(\n        size=128, \n        distance=models.Distance.COSINE\n    ),\n)\n\nbug_reproduced = False\nfor i in range(100):\n    # Generate a random vector\n    vector = np.random.rand(128).tolist()\n\n    # Insert the point\n    client.upsert(\n        collection_name=collection_name,\n        points=[models.PointStruct(id=1, vector=vector)],\n    )\n\n    # Search with the exact same vector (should yield score = 1.0)\n    search_result = client.search(\n        collection_name=collection_name,\n        query_vector=vector,\n        limit=1,\n        with_payload=True,\n    )\n\n    # Check the score\n    score = search_result[0].score\n\n    # Verify the violation\n    if score > 1.0:\n        print(f\"BUG REPRODUCED! Score: {score}\")\n        bug_reproduced = True\n        break\n\nif not bug_reproduced:\n    print(\"Bug not reproduced or fixed.\")\n```\n\n\n## Expected Behavior\n<!--- Tell us what should happen -->\nThe cosine similarity score should be mathematically bounded between `-1.0` and `1.0`. When comparing a vector to itself, the score should be exactly `1.0` and never exceed this theoretical upper bound.\n\n## Possible Solution\n<!--- Not obligatory, but suggest a fix/reason for the bug, -->\nThis is a floating-point precision issue. Explicitly clamping the output of the dot product (after normalization) to `1.0` before returning it as the score will resolve the issue.\n\n## Context (Environment)\n<!--- How has this issue affected you? What are you trying to accomplish? -->\n<!--- Providing context helps us come up with a solution that is most useful in the real world -->\n* **Qdrant Version:** 1.17.1 (Docker Standalone)\n* **Client:** `qdrant-client` (Python)\n* **Distance Metric:** `COSINE`\n\nWe are building a validation framework that strictly enforces the bounds of distance metrics. A similarity score exceeding `1.0` causes validation assertions and boundary checks in downstream systems to fail unexpectedly.\n\n## Detailed Description\n<!--- Provide a detailed description of the change or addition you are proposing -->\nThis is likely caused by floating-point arithmetic precision limits (`f32`) during the dot product calculation of normalized vectors in the core engine. While the theoretical maximum of a cosine similarity is `1.0`, floating-point inaccuracies can cause the result to slightly exceed `1.0` (e.g. `1.0000001192092896`). \n\n## Possible Implementation\n<!--- Not obligatory, but suggest an idea for implementing addition or change -->\nA simple and effective fix would be to explicitly clamp the cosine similarity score to a maximum of `1.0` before returning the result to the client.\n\nFor example, in the Rust core logic where the distance is computed and converted to a score:\n```rust\n// Clamp to valid range\nlet score = computed_score.min(1.0).max(-1.0); \n```",
+      "author": "yihui504",
+      "created_at": "2026-04-16T03:14:22Z",
+      "updated_at": "2026-04-16T13:09:29Z",
+      "url": "https://github.com/qdrant/qdrant/issues/8688",
+      "labels": [
+        "bug"
+      ],
+      "changed_files": [],
+      "summary_text": "[Bug]: Cosine similarity score strictly exceeds upper bound of 1.0 for identical vectors\n<!--- Tell us what happens instead of the expected behavior -->\nWhen using the `COSINE` distance metric, searching for a vector that is identical to an inserted vector occasionally returns a similarity score strictly greater than `1.0` (e.g., `1.0000001` or similar).\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Create a collection using `Distance.COSINE`.\n2. Generate a random `float32` vector array (e.g. 128 dimensions).\n3. Upsert this point into the collection.\n4. Query the collection using `client.search` with the exact same vector.\n5. In certain cases, the returned score will exceed the maximum bound of `1.0`.\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nHere is a minimal reproducible Python script (`qdrant-client`) that loops until the bug is triggered (usually within a few iterations):\n\n```python\nfrom qdrant_client import QdrantClient, models\nimport numpy as np\n\nclient = QdrantClient(url=\"http://localhost:6333\")\n\ncollection_name = \"test_cosine_bound\"\n\n# Ensure clean state\nif client.collection_exists(collection_name):\n    client.delete_collection(collection_name)\n\n# Create collection with Cosine metric\nclient.create_collection(\n    collection_name=collection_name,\n    vectors_config=models.VectorParams(\n        size=128, \n        distance=models.Distance.COSINE\n    ),\n)\n\nbug_reproduced = False\nfor i in range(100):\n    # Generate a random vector\n    vector = np.random.rand(128).tolist()\n\n    # Insert the point\n    client.upsert(\n        collection_name=collection_name,\n        points=[models.PointStruct(id=1, vector=vector)],\n    )\n\n    # Search with the exact same vector (should yield score = 1.0)\n    search_result = client.search(\n        collection_name=collection_name,\n        query_vector=vector,\n        limit=1,\n        with_payload=True,\n    )\n\n    # Check the score\n    score = search_result[0].score\n\n    # Verify the violation\n    if score > 1.0:\n        print(f\"BUG REPRODUCED! Score: {score}\")\n        bug_reproduced = True\n        break\n\nif not bug_reproduced:\n    print(\"Bug not reproduced or fixed.\")\n```\n\n\n## Expected Behavior\n<!--- Tell us what should happen -->\nThe cosine similarity score should be mathematically bounded between `-1.0` and `1.0`. When comparing a vector to itself, the score should be exactly `1.0` and never exceed this theoretical upper bound.\n\n## Possible Solution\n<!--- Not obligatory, but suggest a fix/reason for the bug, -->\nThis is a floating-point precision issue. Explicitly clamping the output of the dot product (after normalization) to `1.0` before returning it as the score will resolve the issue.\n\n## Context (Environment)\n<!--- How has this issue affected you? What are you trying to accomplish? -->\n<!--- Providing context helps us come up with a solution that is most useful in the real world -->\n* **Qdrant Version:** 1.17.1 (Docker Standalone)\n* **Client:** `qdrant-client` (Python)\n* **Distance Metric:** `COSINE`\n\nWe are building a validation framework that strictly enforces the bounds of distance metrics. A similarity score exceeding `1.0` causes validation assertions and boundary checks in downstream systems to fail unexpectedly.\n\n## Detailed Description\n<!--- Provide a detailed description of the change or addition you are proposing -->\nThis is likely caused by floating-point arithmetic precision limits (`f32`) during the dot product calculation of normalized vectors in the core engine. While the theoretical maximum of a cosine similarity is `1.0`, floating-point inaccuracies can cause the result to slightly exceed `1.0` (e.g. `1.0000001192092896`). \n\n## Possible Implementation\n<!--- Not obligatory, but suggest an idea for implementing addition or change -->\nA simple and effective fix would be to explicitly clamp the cosine similarity score to a maximum of `1.0` before returning the result to the client.\n\nFor example, in the Rust core logic where the distance is computed and converted to a score:\n```rust\n// Clamp to valid range\nlet score = computed_score.min(1.0).max(-1.0); \n```"
+    },
+    {
+      "id": 4261245592,
+      "number": 8670,
+      "title": "[Turbo Quant] tracking issue",
+      "message": "This is a tracking issue for Turbo Quant implementation.\n\nDesign doc: https://www.notion.so/qdrant/TurboQuant-design-doc-334674779d33803ab94bca91863cf066\nReference TQ integration: https://github.com/qdrant/qdrant/pull/8544\nReference implementations:\nhttps://github.com/qdrant/qdrant/pull/8567\nhttps://github.com/qdrant/qdrant/pull/8568\n\n- [x] Hadaramd Rotations with permutations https://github.com/qdrant/qdrant/pull/8657\n- [x] Precomputed codebooks with Lloyd Max alg https://github.com/qdrant/qdrant/pull/8672\n- [ ] Basic TQ implementation\n  - [x] Empty TQ struct with `EncodedVectors` implementation https://github.com/qdrant/qdrant/pull/8677\n  - [ ] Single vector encoding (cosine only) https://github.com/qdrant/qdrant/pull/8692\n  - [ ] Metrics, scores\n    - [ ] Cosine scoring with f32 query\n    - [ ] Cosine internal scoring\n    - [ ] Add dot product for query scoring\n    - [ ] Add dot product for internal scoring\n    - [ ] Add L2 for query scoring\n    - [ ] Add L2 for internal scoring\n    - [ ] Add L1 placeholder with complete decoding\n  - [ ] TQ Plus\n    - [ ] Add renormalization support\n    - [ ] Collect rotated vectors stats\n    - [ ] Add precalculated values and modify scoring\n  - [ ] 1.5bit quantization\n- [ ] Integration:\n  - [ ] REST + Grpc API https://github.com/qdrant/qdrant/pull/8686\n  - [ ] TQ in segment:\n    - [x] Add TQ variant into `QuantizedVectorStorage` https://github.com/qdrant/qdrant/pull/8678\n    - [ ] Integrate TQ encode\n    - [ ] Integrate TQ appendable\n    - [ ] Integrate TQ load\n  - [ ] Edge python bindings\n  - [x] GPU fallback https://github.com/qdrant/qdrant/pull/8678\n- [ ] SIMD support\n  - [ ] Hadamard SIMD\n  - [ ] 4bit SIMD\n    - [ ] Precomputed scalar quantized codebooks\n    - [ ] `avx` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n    - [ ] `neon` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n  - [ ] 2bit SIMD\n    - [ ] Precomputed scalar quantized codebooks\n    - [ ] `avx` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n    - [ ] `neon` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n  - [ ] 1bit SIMD\n    - [ ] `avx` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n    - [ ] `neon` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n- [ ] GPU support\n  - [ ] Add `score_internal` for GPU\n  - [ ] Add query encoding in gpu chunk input buffer\n  - [ ] Add 4bit scoring\n  - [ ] Add 2bit scoring\n  - [ ] Add 1bit scoring\n\nToDo's before release:\n  - [ ] Remove 'plus' option from API",
+      "author": "IvanPleshkov",
+      "created_at": "2026-04-14T09:56:00Z",
+      "updated_at": "2026-04-16T12:53:28Z",
+      "url": "https://github.com/qdrant/qdrant/issues/8670",
+      "labels": [],
+      "changed_files": [],
+      "summary_text": "[Turbo Quant] tracking issue\nThis is a tracking issue for Turbo Quant implementation.\n\nDesign doc: https://www.notion.so/qdrant/TurboQuant-design-doc-334674779d33803ab94bca91863cf066\nReference TQ integration: https://github.com/qdrant/qdrant/pull/8544\nReference implementations:\nhttps://github.com/qdrant/qdrant/pull/8567\nhttps://github.com/qdrant/qdrant/pull/8568\n\n- [x] Hadaramd Rotations with permutations https://github.com/qdrant/qdrant/pull/8657\n- [x] Precomputed codebooks with Lloyd Max alg https://github.com/qdrant/qdrant/pull/8672\n- [ ] Basic TQ implementation\n  - [x] Empty TQ struct with `EncodedVectors` implementation https://github.com/qdrant/qdrant/pull/8677\n  - [ ] Single vector encoding (cosine only) https://github.com/qdrant/qdrant/pull/8692\n  - [ ] Metrics, scores\n    - [ ] Cosine scoring with f32 query\n    - [ ] Cosine internal scoring\n    - [ ] Add dot product for query scoring\n    - [ ] Add dot product for internal scoring\n    - [ ] Add L2 for query scoring\n    - [ ] Add L2 for internal scoring\n    - [ ] Add L1 placeholder with complete decoding\n  - [ ] TQ Plus\n    - [ ] Add renormalization support\n    - [ ] Collect rotated vectors stats\n    - [ ] Add precalculated values and modify scoring\n  - [ ] 1.5bit quantization\n- [ ] Integration:\n  - [ ] REST + Grpc API https://github.com/qdrant/qdrant/pull/8686\n  - [ ] TQ in segment:\n    - [x] Add TQ variant into `QuantizedVectorStorage` https://github.com/qdrant/qdrant/pull/8678\n    - [ ] Integrate TQ encode\n    - [ ] Integrate TQ appendable\n    - [ ] Integrate TQ load\n  - [ ] Edge python bindings\n  - [x] GPU fallback https://github.com/qdrant/qdrant/pull/8678\n- [ ] SIMD support\n  - [ ] Hadamard SIMD\n  - [ ] 4bit SIMD\n    - [ ] Precomputed scalar quantized codebooks\n    - [ ] `avx` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n    - [ ] `neon` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n  - [ ] 2bit SIMD\n    - [ ] Precomputed scalar quantized codebooks\n    - [ ] `avx` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n    - [ ] `neon` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n  - [ ] 1bit SIMD\n    - [ ] `avx` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n    - [ ] `neon` implementation\n      - [ ] query scoring\n      - [ ] internal scoring\n      - [ ] internal scoring TQ+\n- [ ] GPU support\n  - [ ] Add `score_internal` for GPU\n  - [ ] Add query encoding in gpu chunk input buffer\n  - [ ] Add 4bit scoring\n  - [ ] Add 2bit scoring\n  - [ ] Add 1bit scoring\n\nToDo's before release:\n  - [ ] Remove 'plus' option from API"
+    }
+  ],
+  "errors": [],
+  "error": null
+}

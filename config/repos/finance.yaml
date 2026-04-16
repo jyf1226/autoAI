@@ -1,0 +1,7 @@
+domain: finance
+groups:
+  回测组:
+    - mementum/backtrader
+    - quantopian/zipline
+  数据组:
+    - ranaroussi/yfinance

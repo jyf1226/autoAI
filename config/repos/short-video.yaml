@@ -1,0 +1,6 @@
+domain: short-video
+groups:
+  视频生成组:
+    - Comfy-Org/ComfyUI
+  剪辑与字幕组:
+    - m1guelpf/auto-subtitle

@@ -1,0 +1,9 @@
+pipelines:
+  daily_report:
+    enabled: true
+    exporters:
+      - markdown
+      - qdrant
+      - training
+  weekly_report:
+    enabled: false

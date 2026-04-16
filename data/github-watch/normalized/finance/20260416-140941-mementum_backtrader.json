@@ -1,0 +1,36 @@
+{
+  "repo": "mementum/backtrader",
+  "domain": "finance",
+  "group": "回测组",
+  "fetched_at": "2026-04-16T14:09:41Z",
+  "time_range": {
+    "start": "2026-04-15T14:09:41Z",
+    "end": "2026-04-16T14:09:41Z"
+  },
+  "commits": [],
+  "pull_requests": [
+    {
+      "id": 3539679834,
+      "number": 518,
+      "title": ".397395619494580:64db3da75f41b97d7bf5d77c49a35fb3_69e0e05547ca93f26a602231.69e0e37247ca93f26a602236.69e0e372d904d1695ee2221e:Trae CN.T(2026/4/16 21:26:10)",
+      "message": "添加情感数据源SentimentCSVData和SentimentCSV\n实现SentimentStrategy策略，根据情感指标进行买卖决策\n添加测试数据和测试脚本验证策略功能",
+      "author": "yangou-hash",
+      "created_at": "2026-04-16T13:34:23Z",
+      "updated_at": "2026-04-16T13:35:08Z",
+      "url": "https://github.com/mementum/backtrader/pull/518",
+      "labels": [],
+      "changed_files": [
+        "backtrader/feeds/__init__.py",
+        "backtrader/feeds/sentimentfeed.py",
+        "backtrader/strategies/__init__.py",
+        "backtrader/strategies/sentiment_strategy.py",
+        "datas/sentiment-test-data.csv",
+        "samples/sentiment-strategy/test_sentiment_strategy.py"
+      ],
+      "summary_text": ".397395619494580:64db3da75f41b97d7bf5d77c49a35fb3_69e0e05547ca93f26a602231.69e0e37247ca93f26a602236.69e0e372d904d1695ee2221e:Trae CN.T(2026/4/16 21:26:10)\n添加情感数据源SentimentCSVData和SentimentCSV\n实现SentimentStrategy策略，根据情感指标进行买卖决策\n添加测试数据和测试脚本验证策略功能"
+    }
+  ],
+  "issues": [],
+  "errors": [],
+  "error": null
+}

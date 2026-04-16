@@ -4,8 +4,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
-@dataclass
+@dataclass(frozen=True)
 class RepoTarget:
+    domain: str
     group: str
     owner: str
     repo: str
@@ -19,7 +20,14 @@ class RepoTarget:
         return f"{self.owner}_{self.repo}"
 
 
-@dataclass
+@dataclass(frozen=True)
+class DomainConfig:
+    domain: str
+    source_file: str
+    targets: list[RepoTarget]
+
+
+@dataclass(frozen=True)
 class TimeRange:
     start: str
     end: str
@@ -28,6 +36,7 @@ class TimeRange:
 @dataclass
 class NormalizedRepoData:
     repo: str
+    domain: str
     group: str
     fetched_at: str
     time_range: TimeRange
@@ -39,6 +48,7 @@ class NormalizedRepoData:
     def as_dict(self) -> dict[str, Any]:
         return {
             "repo": self.repo,
+            "domain": self.domain,
             "group": self.group,
             "fetched_at": self.fetched_at,
             "time_range": {

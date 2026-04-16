@@ -5,11 +5,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-@dataclass
+@dataclass(frozen=True)
 class Settings:
     github_token: str
     github_api_base_url: str
-    repos_file: Path
+    repos_dir: Path
+    prompts_dir: Path
+    pipelines_file: Path
     data_dir: Path
     poll_interval_seconds: int
     request_sleep_seconds: float
@@ -22,7 +24,7 @@ class Settings:
 
 
 def load_settings() -> Settings:
-    repos_file = Path(os.getenv("GITHUB_WATCH_REPOS_FILE", "/app/config/repos.yaml"))
+    config_root = Path(os.getenv("GITHUB_WATCH_CONFIG_DIR", "/app/config"))
     data_dir = Path(os.getenv("GITHUB_WATCH_DATA_DIR", "/data"))
     ollama_base = os.getenv("OLLAMA_BASE_URL", "").strip()
     if not ollama_base:
@@ -30,7 +32,9 @@ def load_settings() -> Settings:
     return Settings(
         github_token=os.getenv("GITHUB_TOKEN", "").strip(),
         github_api_base_url=os.getenv("GITHUB_API_BASE_URL", "https://api.github.com").strip(),
-        repos_file=repos_file,
+        repos_dir=config_root / "repos",
+        prompts_dir=config_root / "prompts",
+        pipelines_file=config_root / "pipelines.yaml",
         data_dir=data_dir,
         poll_interval_seconds=int(os.getenv("GITHUB_WATCH_POLL_INTERVAL_SECONDS", "86400")),
         request_sleep_seconds=float(os.getenv("GITHUB_WATCH_REQUEST_SLEEP_SECONDS", "1")),

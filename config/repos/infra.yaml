@@ -1,0 +1,6 @@
+domain: infra
+groups:
+  服务器与运维组:
+    - jammsen/docker-palworld-dedicated-server
+    - qdrant/qdrant
+    - open-webui/open-webui

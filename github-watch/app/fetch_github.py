@@ -26,13 +26,13 @@ class GitHubClient:
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
         self.session = requests.Session()
-        self.session.headers.update(
-            {
-                "Accept": "application/vnd.github+json",
-                "Authorization": f"Bearer {token}",
-                "X-GitHub-Api-Version": "2022-11-28",
-            }
-        )
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        self.session.headers.update(headers)
 
     def _request_json(self, path: str, params: dict[str, Any]) -> list[dict[str, Any]]:
         url = f"{self.base_url}{path}"
@@ -108,6 +108,7 @@ class GitHubClient:
 
         return {
             "repo": target.full_name,
+            "domain": target.domain,
             "group": target.group,
             "since": since_iso,
             "until": until_iso,

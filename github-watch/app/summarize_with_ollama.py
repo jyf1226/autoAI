@@ -1,33 +1,43 @@
+from __future__ import annotations
+
 import json
 import logging
+from pathlib import Path
 from typing import Any
 
 import requests
 
+from app.domain_rules import get_domain_rule
+from app.utils import load_text
+
 LOGGER = logging.getLogger(__name__)
 
-OLLAMA_PROMPT_TEMPLATE = """
-你是一个游戏项目技术研究助手。请基于输入的 GitHub 更新数据，用中文输出简洁日报摘要。
-
-输出要求：
-1) 先给出 3-5 行总体结论
-2) 按 group 分组，每组给出：
-   - 今日有更新的 repo
-   - 核心变化摘要
-   - 值得重点研究的改动
-   - 对个人项目的可迁移启发
-3) 不要编造数据；没有更新请明确写“无显著更新”
-4) 风格务实、工程化、可执行
-""".strip()
+DOMAIN_PROMPT_FILES = {
+    "games": "repo_summary_game.md",
+    "image-processing": "repo_summary_image.md",
+    "short-video": "repo_summary_video.md",
+    "finance": "repo_summary_finance.md",
+    "infra": "repo_summary_infra.md",
+}
 
 
 def summarize_with_ollama(
     normalized_events: list[dict[str, Any]],
     ollama_base_url: str,
     model: str,
+    prompts_dir: Path,
     timeout_seconds: int = 120,
 ) -> str:
-    prompt = f"{OLLAMA_PROMPT_TEMPLATE}\n\n输入数据(JSON):\n{json.dumps(normalized_events, ensure_ascii=False)}"
+    daily_prompt = load_text(prompts_dir / "daily_report.md", default="请用中文生成日报摘要。")
+    repo_prompt_lines: list[str] = []
+    for domain, filename in DOMAIN_PROMPT_FILES.items():
+        repo_prompt_lines.append(f"[{domain}]")
+        repo_prompt_lines.append(load_text(prompts_dir / filename, default=""))
+    prompt = (
+        f"{daily_prompt}\n\n"
+        f"各 domain 总结提示：\n{chr(10).join(repo_prompt_lines)}\n\n"
+        f"输入数据(JSON):\n{json.dumps(normalized_events, ensure_ascii=False)}"
+    )
     payload = {
         "model": model,
         "prompt": prompt,
@@ -45,16 +55,18 @@ def summarize_with_ollama(
         return result.get("response", "").strip() or "【无模型摘要模式】今日无显著变更。"
     except requests.RequestException as exc:
         LOGGER.exception("Failed to call Ollama API: %s", exc)
-        return _fallback_summary(normalized_events, f"【无模型摘要模式】Ollama 调用失败: {exc}")
+        return build_fallback_summary(normalized_events, f"【无模型摘要模式】Ollama 调用失败: {exc}")
 
 
-def _fallback_summary(normalized_events: list[dict[str, Any]], title: str) -> str:
-    groups: dict[str, list[dict[str, Any]]] = {}
+def build_fallback_summary(normalized_events: list[dict[str, Any]], title: str) -> str:
+    domains: dict[str, list[dict[str, Any]]] = {}
     for item in normalized_events:
-        groups.setdefault(item.get("group", "未分组"), []).append(item)
+        domains.setdefault(item.get("domain", "unknown"), []).append(item)
     lines = [title]
-    for group_name, repos in groups.items():
-        lines.append(f"- {group_name}")
+    for domain_name, repos in domains.items():
+        rule = get_domain_rule(domain_name)
+        lines.append(f"- domain={domain_name}")
+        lines.append(f"  - 关注角度: {rule.get('research_angle', '')}")
         for repo in repos:
             lines.append(
                 f"  - {repo.get('repo')}: commits={len(repo.get('commits', []))}, "
