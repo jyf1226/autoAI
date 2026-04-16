@@ -1,0 +1,244 @@
+{
+  "repo": "open-webui/open-webui",
+  "domain": "infra",
+  "group": "服务器与运维组",
+  "fetched_at": "2026-04-16T14:49:17Z",
+  "time_range": {
+    "start": "2026-04-16T14:09:41Z",
+    "end": "2026-04-16T14:49:17Z"
+  },
+  "commits": [],
+  "pull_requests": [
+    {
+      "id": 3539354514,
+      "number": 23790,
+      "title": "fix(terminals): mirror HTTP auth modes in websocket terminal proxy",
+      "message": "Terminal connections already advertise multiple auth modes, and `proxy_terminal` forwards bearer, session, and system_oauth credentials. `ws_terminal` only sent an upstream auth frame for bearer, so session-backed and OAuth-backed terminal connections had no equivalent upstream auth material on the websocket path.\n\nThis extracts the terminal auth assembly into a shared helper and reuses it for both the HTTP proxy and the websocket handshake. The websocket keeps the existing bearer auth frame and now sends the same handshake headers/cookies used by the HTTP proxy for the other auth modes.\n\nRelated: #23788\n\n### Testing\n\n- `python3 -m py_compile backend/open_webui/routers/terminals.py backend/open_webui/utils/terminals.py`\n- `PYTHONPATH=backend PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q backend/open_webui/test/util/test_terminals.py`\n- local source-faithful harness showing that the old websocket logic sent an auth frame for `bearer` but nothing for `session` or `system_oauth`\n\n# Changelog Entry\n\n### Description\n\n- keep terminal websocket auth behavior aligned with the terminal HTTP proxy\n\n### Added\n\n- focused terminal auth helper tests for bearer, session, and system_oauth modes\n\n### Fixed\n\n- terminal websocket handshakes now reuse the same auth assembly as the HTTP proxy instead of silently dropping non-bearer modes\n\n### Additional Information\n\n- This is distinct from `#22581` (`ws://` vs `wss://` under HTTPS).\n- There was a nearby closed PR (`#23603`) on terminal websocket auth; this keeps the scope narrow and fixes the current `main` mismatch between `proxy_terminal` and `ws_terminal`.\n\n### Contributor License Agreement\n\n<!--\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\nKeep the \"Contributor License Agreement\" confirmation text intact.\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\n-->\n\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\n\n> [!NOTE]\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.\n",
+      "author": "shaun0927",
+      "created_at": "2026-04-16T12:23:50Z",
+      "updated_at": "2026-04-16T14:41:58Z",
+      "url": "https://github.com/open-webui/open-webui/pull/23790",
+      "labels": [],
+      "changed_files": [
+        "backend/open_webui/routers/terminals.py",
+        "backend/open_webui/test/util/test_terminals.py",
+        "backend/open_webui/utils/terminals.py"
+      ],
+      "summary_text": "fix(terminals): mirror HTTP auth modes in websocket terminal proxy\nTerminal connections already advertise multiple auth modes, and `proxy_terminal` forwards bearer, session, and system_oauth credentials. `ws_terminal` only sent an upstream auth frame for bearer, so session-backed and OAuth-backed terminal connections had no equivalent upstream auth material on the websocket path.\n\nThis extracts the terminal auth assembly into a shared helper and reuses it for both the HTTP proxy and the websocket handshake. The websocket keeps the existing bearer auth frame and now sends the same handshake headers/cookies used by the HTTP proxy for the other auth modes.\n\nRelated: #23788\n\n### Testing\n\n- `python3 -m py_compile backend/open_webui/routers/terminals.py backend/open_webui/utils/terminals.py`\n- `PYTHONPATH=backend PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q backend/open_webui/test/util/test_terminals.py`\n- local source-faithful harness showing that the old websocket logic sent an auth frame for `bearer` but nothing for `session` or `system_oauth`\n\n# Changelog Entry\n\n### Description\n\n- keep terminal websocket auth behavior aligned with the terminal HTTP proxy\n\n### Added\n\n- focused terminal auth helper tests for bearer, session, and system_oauth modes\n\n### Fixed\n\n- terminal websocket handshakes now reuse the same auth assembly as the HTTP proxy instead of silently dropping non-bearer modes\n\n### Additional Information\n\n- This is distinct from `#22581` (`ws://` vs `wss://` under HTTPS).\n- There was a nearby closed PR (`#23603`) on terminal websocket auth; this keeps the scope narrow and fixes the current `main` mismatch between `proxy_terminal` and `ws_terminal`.\n\n### Contributor License Agreement\n\n<!--\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\nKeep the \"Contributor License Agreement\" confirmation text intact.\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\n-->\n\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\n\n> [!NOTE]\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.",
+      "doc_id": "open-webui/open-webui:pull_request:3539354514",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/open-webui/open-webui/pull/23790"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3539887786,
+      "number": 23801,
+      "title": "perf: add index on memory.user_id",
+      "message": "Memory queries filter by user_id (get_memories_by_user_id, delete_memories_by_user_id) but the column had no index, forcing a full table scan per request. Adds a btree index via Alembic migration plus index=True on the model so fresh installs include it.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.\r\n",
+      "author": "Classic298",
+      "created_at": "2026-04-16T14:13:19Z",
+      "updated_at": "2026-04-16T14:18:37Z",
+      "url": "https://github.com/open-webui/open-webui/pull/23801",
+      "labels": [],
+      "changed_files": [
+        "backend/open_webui/migrations/versions/a749ab2aa953_add_memory_user_id_index.py",
+        "backend/open_webui/models/memories.py"
+      ],
+      "summary_text": "perf: add index on memory.user_id\nMemory queries filter by user_id (get_memories_by_user_id, delete_memories_by_user_id) but the column had no index, forcing a full table scan per request. Adds a btree index via Alembic migration plus index=True on the model so fresh installs include it.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.",
+      "doc_id": "open-webui/open-webui:pull_request:3539887786",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/open-webui/open-webui/pull/23801"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3539859801,
+      "number": 23797,
+      "title": "perf(chats): avoid redundant fetch in get_chat_by_share_id",
+      "message": "get_chat_by_share_id already loads the Chat row via share_id lookup, then discarded it and re-fetched through get_chat_by_id. Drop the second query and return the row we already have, preserving the null-byte sanitization behavior inline.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.\r\n",
+      "author": "Classic298",
+      "created_at": "2026-04-16T14:07:30Z",
+      "updated_at": "2026-04-16T14:15:40Z",
+      "url": "https://github.com/open-webui/open-webui/pull/23797",
+      "labels": [],
+      "changed_files": [
+        "backend/open_webui/models/chats.py"
+      ],
+      "summary_text": "perf(chats): avoid redundant fetch in get_chat_by_share_id\nget_chat_by_share_id already loads the Chat row via share_id lookup, then discarded it and re-fetched through get_chat_by_id. Drop the second query and return the row we already have, preserving the null-byte sanitization behavior inline.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.",
+      "doc_id": "open-webui/open-webui:pull_request:3539859801",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/open-webui/open-webui/pull/23797"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3539861275,
+      "number": 23798,
+      "title": "perf(chats): select only meta column in get_chat_tags_by_id_and_user_id",
+      "message": "Avoid loading the full Chat row (including the potentially large `chat` JSON column) just to read tag IDs from `meta.tags`. Issue a narrow SELECT on `Chat.meta` instead, which is much cheaper for chats with large message histories.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.\r\n",
+      "author": "Classic298",
+      "created_at": "2026-04-16T14:07:49Z",
+      "updated_at": "2026-04-16T14:13:52Z",
+      "url": "https://github.com/open-webui/open-webui/pull/23798",
+      "labels": [],
+      "changed_files": [
+        "backend/open_webui/models/chats.py"
+      ],
+      "summary_text": "perf(chats): select only meta column in get_chat_tags_by_id_and_user_id\nAvoid loading the full Chat row (including the potentially large `chat` JSON column) just to read tag IDs from `meta.tags`. Issue a narrow SELECT on `Chat.meta` instead, which is much cheaper for chats with large message histories.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.",
+      "doc_id": "open-webui/open-webui:pull_request:3539861275",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/open-webui/open-webui/pull/23798"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3539864472,
+      "number": 23799,
+      "title": "perf: avoid redundant knowledge re-fetch in update_knowledge_access_by_id",
+      "message": "After set_access_grants, the handler was reloading the same knowledge record via get_knowledge_by_id, which triggers an extra SELECT plus a nested fetch of access grants. set_access_grants already returns the newly-written grants and the local knowledge object is otherwise unchanged, so update it in place and reuse it for the response.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.\r\n",
+      "author": "Classic298",
+      "created_at": "2026-04-16T14:08:30Z",
+      "updated_at": "2026-04-16T14:11:57Z",
+      "url": "https://github.com/open-webui/open-webui/pull/23799",
+      "labels": [],
+      "changed_files": [
+        "backend/open_webui/routers/knowledge.py"
+      ],
+      "summary_text": "perf: avoid redundant knowledge re-fetch in update_knowledge_access_by_id\nAfter set_access_grants, the handler was reloading the same knowledge record via get_knowledge_by_id, which triggers an extra SELECT plus a nested fetch of access grants. set_access_grants already returns the newly-written grants and the local knowledge object is otherwise unchanged, so update it in place and reuse it for the response.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.",
+      "doc_id": "open-webui/open-webui:pull_request:3539864472",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/open-webui/open-webui/pull/23799"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3539870136,
+      "number": 23800,
+      "title": "perf: use set for O(1) lookup in insert_chat_files dedupe",
+      "message": "Convert chat_message_file_ids from list to set so the membership test in the comprehension is O(1) instead of O(m), turning the dedupe from O(n*m) into O(n+m). Also replace the redundant set([...]) with a set comprehension.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.\r\n",
+      "author": "Classic298",
+      "created_at": "2026-04-16T14:09:42Z",
+      "updated_at": "2026-04-16T14:11:36Z",
+      "url": "https://github.com/open-webui/open-webui/pull/23800",
+      "labels": [],
+      "changed_files": [
+        "backend/open_webui/models/chats.py"
+      ],
+      "summary_text": "perf: use set for O(1) lookup in insert_chat_files dedupe\nConvert chat_message_file_ids from list to set so the membership test in the comprehension is O(1) instead of O(m), turning the dedupe from O(n*m) into O(n+m). Also replace the redundant set([...]) with a set comprehension.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.",
+      "doc_id": "open-webui/open-webui:pull_request:3539870136",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/open-webui/open-webui/pull/23800"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3539857523,
+      "number": 23796,
+      "title": "perf: reuse request db session in get_model_profile_image",
+      "message": "Pass the request-scoped AsyncSession into Models.get_model_by_id so the endpoint no longer opens a fresh DB session on every call, avoiding an extra connection acquisition per profile image request.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.\r\n",
+      "author": "Classic298",
+      "created_at": "2026-04-16T14:07:02Z",
+      "updated_at": "2026-04-16T14:11:12Z",
+      "url": "https://github.com/open-webui/open-webui/pull/23796",
+      "labels": [],
+      "changed_files": [
+        "backend/open_webui/routers/models.py"
+      ],
+      "summary_text": "perf: reuse request db session in get_model_profile_image\nPass the request-scoped AsyncSession into Models.get_model_by_id so the endpoint no longer opens a fresh DB session on every call, avoiding an extra connection acquisition per profile image request.\r\n\r\n### Contributor License Agreement\r\n\r\n<!--\r\n🚨 DO NOT DELETE THE TEXT BELOW 🚨\r\nKeep the \"Contributor License Agreement\" confirmation text intact.\r\nDeleting it will trigger the CLA-Bot to INVALIDATE your PR.\r\n\r\nYour PR will NOT be reviewed or merged until you check the box below confirming that you have read and agree to the terms of the CLA.\r\n-->\r\n\r\n- [X] By submitting this pull request, I confirm that I have read and fully agree to the [Contributor License Agreement (CLA)](https://github.com/open-webui/open-webui/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT), and I am providing my contributions under its terms.\r\n\r\n> [!NOTE]\r\n> Deleting the CLA section will lead to immediate closure of your PR and it will not be merged in.",
+      "doc_id": "open-webui/open-webui:pull_request:3539857523",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/open-webui/open-webui/pull/23796"
+      },
+      "chunk_source": "full_text_v1"
+    }
+  ],
+  "issues": [
+    {
+      "id": 4275674538,
+      "number": 23788,
+      "title": "issue: terminal websocket ignores session/system_oauth auth modes",
+      "message": "### Check Existing Issues\n\n- [x] I have searched for any existing and/or related issues.\n- [x] I have searched for any existing and/or related discussions.\n- [x] I have also searched in the CLOSED issues AND CLOSED discussions and found no exact duplicate.\n- [x] I am using the latest version of Open WebUI.\n\n### Installation Method\n\nGit Clone\n\n### Open WebUI Version\n\nlatest `main` as of 2026-04-16 (latest release also checked: `v0.8.12`)\n\n### Ollama Version (if applicable)\n\n_No response_\n\n### Operating System\n\nmacOS Sequoia\n\n### Browser (if applicable)\n\n_No response_\n\n### Confirmation\n\n- [x] I have read and followed all instructions in `README.md`.\n- [x] I am using the latest version of Open WebUI.\n- [x] I have provided a deterministic local reproduction of the affected code path.\n- [x] I have included the relevant code path, expected behavior, actual behavior, and exact reproduction steps.\n\n### Expected Behavior\n\nThe terminal websocket proxy should support the same auth modes as the terminal HTTP proxy.\n\nIf `proxy_terminal` supports `bearer`, `session`, and `system_oauth`, then `ws_terminal` should not silently drop the non-bearer auth paths.\n\n### Actual Behavior\n\n`proxy_terminal` handles:\n- `bearer`\n- `session`\n- `system_oauth`\n\nbut `ws_terminal` only sends upstream auth material when `auth_type == 'bearer'`.\n\nThat makes the websocket path behavior inconsistent with the HTTP proxy path.\n\nThis is **not** the same bug as `#22581` (`ws://` vs `wss://` under HTTPS).\nIt is an auth-mode mismatch.\n\nThere was also a nearby closed PR `#23603` (`Fix terminal orchestrator ws auth`), but the current `main` / `v0.8.12` code still shows the mismatch below.\n\n### Steps to Reproduce\n\nCurrent HTTP proxy path in `backend/open_webui/routers/terminals.py`:\n\n```python\nif auth_type == 'bearer':\n    headers['Authorization'] = f'Bearer {connection.get(\"key\", \"\")}'\nelif auth_type == 'session':\n    cookies = request.cookies\n    headers['Authorization'] = f'Bearer {request.state.token.credentials}'\nelif auth_type == 'system_oauth':\n    cookies = request.cookies\n    oauth_token = request.headers.get('x-oauth-access-token', '')\n    if oauth_token:\n        headers['Authorization'] = f'Bearer {oauth_token}'\n```\n\nCurrent websocket path:\n\n```python\nauth_type = connection.get('auth_type', 'bearer')\nif auth_type == 'bearer':\n    key = connection.get('key', '')\n    await upstream.send_str(_json.dumps({'type': 'auth', 'token': key}))\n```\n\nA deterministic local reproduction of the logic is:\n\n```python\nimport asyncio\nimport json\n\nclass FakeUpstream:\n    def __init__(self):\n        self.sent = []\n    async def send_str(self, data):\n        self.sent.append(('str', data))\n\nasync def simulate(auth_type, key='secret-token'):\n    upstream = FakeUpstream()\n    if auth_type == 'bearer':\n        await upstream.send_str(json.dumps({'type': 'auth', 'token': key}))\n    return upstream.sent\n\nfor auth_type in ['bearer', 'session', 'system_oauth', 'none']:\n    sent = asyncio.run(simulate(auth_type))\n    print(f'{auth_type} -> sent = {sent}')\n```\n\nActual output:\n\n```text\nbearer -> sent = [('str', '{\"type\": \"auth\", \"token\": \"secret-token\"}')]\nsession -> sent = []\nsystem_oauth -> sent = []\nnone -> sent = []\n```\n\n### Logs & Screenshots\n\nRelevant current websocket code path (`backend/open_webui/routers/terminals.py`):\n\n```python\nauth_type = connection.get('auth_type', 'bearer')\nif auth_type == 'bearer':\n    key = connection.get('key', '')\n    await upstream.send_str(_json.dumps({'type': 'auth', 'token': key}))\n```\n\n### Additional Information\n\nThis looks like an implementation mismatch rather than a security issue.\n\nI have a narrow fix ready that centralizes the auth assembly used by `proxy_terminal` and reuses it for the websocket handshake so the two paths do not drift.\n",
+      "author": "shaun0927",
+      "created_at": "2026-04-16T12:22:55Z",
+      "updated_at": "2026-04-16T14:42:35Z",
+      "url": "https://github.com/open-webui/open-webui/issues/23788",
+      "labels": [],
+      "changed_files": [],
+      "summary_text": "issue: terminal websocket ignores session/system_oauth auth modes\n### Check Existing Issues\n\n- [x] I have searched for any existing and/or related issues.\n- [x] I have searched for any existing and/or related discussions.\n- [x] I have also searched in the CLOSED issues AND CLOSED discussions and found no exact duplicate.\n- [x] I am using the latest version of Open WebUI.\n\n### Installation Method\n\nGit Clone\n\n### Open WebUI Version\n\nlatest `main` as of 2026-04-16 (latest release also checked: `v0.8.12`)\n\n### Ollama Version (if applicable)\n\n_No response_\n\n### Operating System\n\nmacOS Sequoia\n\n### Browser (if applicable)\n\n_No response_\n\n### Confirmation\n\n- [x] I have read and followed all instructions in `README.md`.\n- [x] I am using the latest version of Open WebUI.\n- [x] I have provided a deterministic local reproduction of the affected code path.\n- [x] I have included the relevant code path, expected behavior, actual behavior, and exact reproduction steps.\n\n### Expected Behavior\n\nThe terminal websocket proxy should support the same auth modes as the terminal HTTP proxy.\n\nIf `proxy_terminal` supports `bearer`, `session`, and `system_oauth`, then `ws_terminal` should not silently drop the non-bearer auth paths.\n\n### Actual Behavior\n\n`proxy_terminal` handles:\n- `bearer`\n- `session`\n- `system_oauth`\n\nbut `ws_terminal` only sends upstream auth material when `auth_type == 'bearer'`.\n\nThat makes the websocket path behavior inconsistent with the HTTP proxy path.\n\nThis is **not** the same bug as `#22581` (`ws://` vs `wss://` under HTTPS).\nIt is an auth-mode mismatch.\n\nThere was also a nearby closed PR `#23603` (`Fix terminal orchestrator ws auth`), but the current `main` / `v0.8.12` code still shows the mismatch below.\n\n### Steps to Reproduce\n\nCurrent HTTP proxy path in `backend/open_webui/routers/terminals.py`:\n\n```python\nif auth_type == 'bearer':\n    headers['Authorization'] = f'Bearer {connection.get(\"key\", \"\")}'\nelif auth_type == 'session':\n    cookies = request.cookies\n    headers['Authorization'] = f'Bearer {request.state.token.credentials}'\nelif auth_type == 'system_oauth':\n    cookies = request.cookies\n    oauth_token = request.headers.get('x-oauth-access-token', '')\n    if oauth_token:\n        headers['Authorization'] = f'Bearer {oauth_token}'\n```\n\nCurrent websocket path:\n\n```python\nauth_type = connection.get('auth_type', 'bearer')\nif auth_type == 'bearer':\n    key = connection.get('key', '')\n    await upstream.send_str(_json.dumps({'type': 'auth', 'token': key}))\n```\n\nA deterministic local reproduction of the logic is:\n\n```python\nimport asyncio\nimport json\n\nclass FakeUpstream:\n    def __init__(self):\n        self.sent = []\n    async def send_str(self, data):\n        self.sent.append(('str', data))\n\nasync def simulate(auth_type, key='secret-token'):\n    upstream = FakeUpstream()\n    if auth_type == 'bearer':\n        await upstream.send_str(json.dumps({'type': 'auth', 'token': key}))\n    return upstream.sent\n\nfor auth_type in ['bearer', 'session', 'system_oauth', 'none']:\n    sent = asyncio.run(simulate(auth_type))\n    print(f'{auth_type} -> sent = {sent}')\n```\n\nActual output:\n\n```text\nbearer -> sent = [('str', '{\"type\": \"auth\", \"token\": \"secret-token\"}')]\nsession -> sent = []\nsystem_oauth -> sent = []\nnone -> sent = []\n```\n\n### Logs & Screenshots\n\nRelevant current websocket code path (`backend/open_webui/routers/terminals.py`):\n\n```python\nauth_type = connection.get('auth_type', 'bearer')\nif auth_type == 'bearer':\n    key = connection.get('key', '')\n    await upstream.send_str(_json.dumps({'type': 'auth', 'token': key}))\n```\n\n### Additional Information\n\nThis looks like an implementation mismatch rather than a security issue.\n\nI have a narrow fix ready that centralizes the auth assembly used by `proxy_terminal` and reuses it for the websocket handshake so the two paths do not drift.",
+      "doc_id": "open-webui/open-webui:issue:4275674538",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "issue",
+        "source_url": "https://github.com/open-webui/open-webui/issues/23788"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 4275671468,
+      "number": 23787,
+      "title": "issue: file content update can silently lose KB embeddings when reindex fails",
+      "message": "### Check Existing Issues\n\n- [x] I have searched for any existing and/or related issues.\n- [x] I have searched for any existing and/or related discussions.\n- [x] I have also searched in the CLOSED issues AND CLOSED discussions and found no exact duplicate.\n- [x] I am using the latest version of Open WebUI.\n\n### Installation Method\n\nGit Clone\n\n### Open WebUI Version\n\nlatest `main` as of 2026-04-16 (latest release also checked: `v0.8.12`)\n\n### Ollama Version (if applicable)\n\n_No response_\n\n### Operating System\n\nmacOS Sequoia\n\n### Browser (if applicable)\n\n_No response_\n\n### Confirmation\n\n- [x] I have read and followed all instructions in `README.md`.\n- [x] I am using the latest version of Open WebUI.\n- [x] I have provided a deterministic local reproduction of the affected code path.\n- [x] I have included the relevant code path, expected behavior, actual behavior, and exact reproduction steps.\n\n### Expected Behavior\n\nUpdating a file's content should not leave any knowledge collection in a worse state than before.\n\nIf the KB reindex step fails after the file content has been updated, Open WebUI should either:\n- preserve the old KB vectors, or\n- fail the request before destructive cleanup happens.\n\n### Actual Behavior\n\n`/files/{id}/data/content/update` currently deletes the old KB vectors first and only then tries to rebuild them.\n\nIf the rebuild fails, the exception is reduced to a warning and the route still returns success. That can leave the knowledge collection without any vectors for that file.\n\nThis is different from `#20558`:\n- `#20558` = stale old embeddings remained after edits\n- this report = the old embeddings are deleted, the rebuild fails, and the route still succeeds\n\n### Steps to Reproduce\n\nThe current `main` code in `backend/open_webui/routers/files.py` does this during content updates:\n\n1. update the file content via `process_file(..., content=...)`\n2. for each knowledge collection referencing the file:\n   - `delete(... filter={'file_id': id})`\n   - `process_file(..., collection_name=knowledge.id)`\n3. if step 2b fails, only log a warning and continue\n\nA deterministic local reproduction is:\n\n```python\nfrom dataclasses import dataclass\n\nkb_vectors = {'kb-1': [{'file_id': 'file-1', 'chunk': 'OLD EMBEDDING'}]}\n\n@dataclass\nclass Knowledge:\n    id: str\n\nclass VECTOR_DB_CLIENT:\n    @staticmethod\n    def delete(collection_name, filter):\n        kb_vectors[collection_name] = [\n            v for v in kb_vectors.get(collection_name, [])\n            if v.get('file_id') != filter['file_id']\n        ]\n\nclass ProcessFileForm:\n    def __init__(self, file_id, collection_name=None):\n        self.file_id = file_id\n        self.collection_name = collection_name\n\ndef process_file(request, form, user, db=None):\n    if form.collection_name:\n        raise RuntimeError('reindex failed')\n\nfor knowledge in [Knowledge(id='kb-1')]:\n    try:\n        VECTOR_DB_CLIENT.delete(collection_name=knowledge.id, filter={'file_id': 'file-1'})\n        process_file(None, ProcessFileForm(file_id='file-1', collection_name=knowledge.id), user=None)\n    except Exception as e:\n        print('swallowed knowledge reindex failure:', e)\n\nprint('remaining_vectors =', kb_vectors['kb-1'])\n```\n\nActual output:\n\n```text\nswallowed knowledge reindex failure: reindex failed\nremaining_vectors = []\n```\n\nThe route-level call sequence is effectively:\n\n```text\nprocess_file(file-1, content='NEW')\ndelete(kb-1, {'file_id': 'file-1'})\nprocess_file(file-1, collection_name='kb-1')  # fails\nreturn {'content': 'NEW'}\n```\n\n### Logs & Screenshots\n\nRelevant current code path (`backend/open_webui/routers/files.py`):\n\n```python\nawait ASYNC_VECTOR_DB_CLIENT.delete(collection_name=knowledge.id, filter={'file_id': id})\nawait process_file(\n    request,\n    ProcessFileForm(file_id=id, collection_name=knowledge.id),\n    user=user,\n    db=db,\n)\n```\n\nand on failure:\n\n```python\nlog.warning(f'Failed to update knowledge {knowledge.id} after content change for file {id}: {e}')\n```\n\n### Additional Information\n\nRelated but not exact duplicates:\n- `#20558` fixed the stale-embedding case\n- `#6311` is about failed embeddings handling in general\n\nI have a narrow fix ready that rebuilds first and only deletes the stale vector ids after the new insert succeeds, plus a focused regression test.\n",
+      "author": "shaun0927",
+      "created_at": "2026-04-16T12:22:19Z",
+      "updated_at": "2026-04-16T14:42:33Z",
+      "url": "https://github.com/open-webui/open-webui/issues/23787",
+      "labels": [],
+      "changed_files": [],
+      "summary_text": "issue: file content update can silently lose KB embeddings when reindex fails\n### Check Existing Issues\n\n- [x] I have searched for any existing and/or related issues.\n- [x] I have searched for any existing and/or related discussions.\n- [x] I have also searched in the CLOSED issues AND CLOSED discussions and found no exact duplicate.\n- [x] I am using the latest version of Open WebUI.\n\n### Installation Method\n\nGit Clone\n\n### Open WebUI Version\n\nlatest `main` as of 2026-04-16 (latest release also checked: `v0.8.12`)\n\n### Ollama Version (if applicable)\n\n_No response_\n\n### Operating System\n\nmacOS Sequoia\n\n### Browser (if applicable)\n\n_No response_\n\n### Confirmation\n\n- [x] I have read and followed all instructions in `README.md`.\n- [x] I am using the latest version of Open WebUI.\n- [x] I have provided a deterministic local reproduction of the affected code path.\n- [x] I have included the relevant code path, expected behavior, actual behavior, and exact reproduction steps.\n\n### Expected Behavior\n\nUpdating a file's content should not leave any knowledge collection in a worse state than before.\n\nIf the KB reindex step fails after the file content has been updated, Open WebUI should either:\n- preserve the old KB vectors, or\n- fail the request before destructive cleanup happens.\n\n### Actual Behavior\n\n`/files/{id}/data/content/update` currently deletes the old KB vectors first and only then tries to rebuild them.\n\nIf the rebuild fails, the exception is reduced to a warning and the route still returns success. That can leave the knowledge collection without any vectors for that file.\n\nThis is different from `#20558`:\n- `#20558` = stale old embeddings remained after edits\n- this report = the old embeddings are deleted, the rebuild fails, and the route still succeeds\n\n### Steps to Reproduce\n\nThe current `main` code in `backend/open_webui/routers/files.py` does this during content updates:\n\n1. update the file content via `process_file(..., content=...)`\n2. for each knowledge collection referencing the file:\n   - `delete(... filter={'file_id': id})`\n   - `process_file(..., collection_name=knowledge.id)`\n3. if step 2b fails, only log a warning and continue\n\nA deterministic local reproduction is:\n\n```python\nfrom dataclasses import dataclass\n\nkb_vectors = {'kb-1': [{'file_id': 'file-1', 'chunk': 'OLD EMBEDDING'}]}\n\n@dataclass\nclass Knowledge:\n    id: str\n\nclass VECTOR_DB_CLIENT:\n    @staticmethod\n    def delete(collection_name, filter):\n        kb_vectors[collection_name] = [\n            v for v in kb_vectors.get(collection_name, [])\n            if v.get('file_id') != filter['file_id']\n        ]\n\nclass ProcessFileForm:\n    def __init__(self, file_id, collection_name=None):\n        self.file_id = file_id\n        self.collection_name = collection_name\n\ndef process_file(request, form, user, db=None):\n    if form.collection_name:\n        raise RuntimeError('reindex failed')\n\nfor knowledge in [Knowledge(id='kb-1')]:\n    try:\n        VECTOR_DB_CLIENT.delete(collection_name=knowledge.id, filter={'file_id': 'file-1'})\n        process_file(None, ProcessFileForm(file_id='file-1', collection_name=knowledge.id), user=None)\n    except Exception as e:\n        print('swallowed knowledge reindex failure:', e)\n\nprint('remaining_vectors =', kb_vectors['kb-1'])\n```\n\nActual output:\n\n```text\nswallowed knowledge reindex failure: reindex failed\nremaining_vectors = []\n```\n\nThe route-level call sequence is effectively:\n\n```text\nprocess_file(file-1, content='NEW')\ndelete(kb-1, {'file_id': 'file-1'})\nprocess_file(file-1, collection_name='kb-1')  # fails\nreturn {'content': 'NEW'}\n```\n\n### Logs & Screenshots\n\nRelevant current code path (`backend/open_webui/routers/files.py`):\n\n```python\nawait ASYNC_VECTOR_DB_CLIENT.delete(collection_name=knowledge.id, filter={'file_id': id})\nawait process_file(\n    request,\n    ProcessFileForm(file_id=id, collection_name=knowledge.id),\n    user=user,\n    db=db,\n)\n```\n\nand on failure:\n\n```python\nlog.warning(f'Failed to update knowledge {knowledge.id} after content change for file {id}: {e}')\n```\n\n### Additional Information\n\nRelated but not exact duplicates:\n- `#20558` fixed the stale-embedding case\n- `#6311` is about failed embeddings handling in general\n\nI have a narrow fix ready that rebuilds first and only deletes the stale vector ids after the new insert succeeds, plus a focused regression test.",
+      "doc_id": "open-webui/open-webui:issue:4275671468",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "issue",
+        "source_url": "https://github.com/open-webui/open-webui/issues/23787"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 4275639875,
+      "number": 23785,
+      "title": "feat: Allow Access from Chat Prompt to the Models Prompts.",
+      "message": "### Check Existing Issues\n\n- [x] I have searched for all existing **open AND closed** issues and discussions for similar requests. I have found none that is comparable to my request.\n\n### Verify Feature Scope\n\n- [x] I have read through and understood the scope definition for feature requests in the Issues section. I believe my feature request meets the definition and belongs in the Issues section instead of the Discussions.\n\n### Problem Description\n\nThere is no access to a models prompts after the first chat message has been sent.  Model prompts are only used during the initial \"suggestion\" phase.  This causes the users to have to re-start a model just to get their prompts back.\n\n### Desired Solution you'd like\n\nWhen chatting the the model, it would be very helpful to be able to quickly access the prompts defined in the model with a command suffix perhaps.  Model prompts are very specific and help users work with the models.  \n\n### Alternatives Considered\n\n_No response_\n\n### Additional Context\n\n_No response_",
+      "author": "carlvon1800",
+      "created_at": "2026-04-16T12:16:10Z",
+      "updated_at": "2026-04-16T14:36:06Z",
+      "url": "https://github.com/open-webui/open-webui/issues/23785",
+      "labels": [],
+      "changed_files": [],
+      "summary_text": "feat: Allow Access from Chat Prompt to the Models Prompts.\n### Check Existing Issues\n\n- [x] I have searched for all existing **open AND closed** issues and discussions for similar requests. I have found none that is comparable to my request.\n\n### Verify Feature Scope\n\n- [x] I have read through and understood the scope definition for feature requests in the Issues section. I believe my feature request meets the definition and belongs in the Issues section instead of the Discussions.\n\n### Problem Description\n\nThere is no access to a models prompts after the first chat message has been sent.  Model prompts are only used during the initial \"suggestion\" phase.  This causes the users to have to re-start a model just to get their prompts back.\n\n### Desired Solution you'd like\n\nWhen chatting the the model, it would be very helpful to be able to quickly access the prompts defined in the model with a command suffix perhaps.  Model prompts are very specific and help users work with the models.  \n\n### Alternatives Considered\n\n_No response_\n\n### Additional Context\n\n_No response_",
+      "doc_id": "open-webui/open-webui:issue:4275639875",
+      "metadata": {
+        "repo": "open-webui/open-webui",
+        "domain": "infra",
+        "event_type": "issue",
+        "source_url": "https://github.com/open-webui/open-webui/issues/23785"
+      },
+      "chunk_source": "full_text_v1"
+    }
+  ],
+  "errors": [],
+  "error": null
+}

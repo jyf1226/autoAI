@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import socket
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
@@ -23,12 +25,56 @@ class Settings:
     ollama_timeout_seconds: int
 
 
+def _is_running_in_container() -> bool:
+    if os.path.exists("/.dockerenv"):
+        return True
+    try:
+        cgroup_text = Path("/proc/1/cgroup").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return "docker" in cgroup_text or "containerd" in cgroup_text
+
+
+def _is_url_reachable(base_url: str, timeout_seconds: float = 0.3) -> bool:
+    parsed = urlparse(base_url)
+    host = parsed.hostname
+    if not host:
+        return False
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    try:
+        with socket.create_connection((host, port), timeout=timeout_seconds):
+            return True
+    except OSError:
+        return False
+
+
+def _resolve_ollama_base_url() -> str:
+    explicit_base = os.getenv("OLLAMA_BASE_URL", "").strip()
+    if explicit_base:
+        return explicit_base
+
+    # Backward-compatible alias; keep as highest-priority fallback after OLLAMA_BASE_URL.
+    alias_host = os.getenv("OLLAMA_HOST", "").strip()
+    if alias_host:
+        return alias_host
+
+    # Auto-detect best default for host-run vs container-run.
+    candidates = ["http://127.0.0.1:11434", "http://localhost:11434"]
+    if _is_running_in_container():
+        candidates = ["http://host.docker.internal:11434", *candidates]
+
+    for candidate in candidates:
+        if _is_url_reachable(candidate):
+            return candidate
+
+    # Keep deterministic fallback even when Ollama is currently down.
+    return "http://host.docker.internal:11434" if _is_running_in_container() else "http://127.0.0.1:11434"
+
+
 def load_settings() -> Settings:
     config_root = Path(os.getenv("GITHUB_WATCH_CONFIG_DIR", "/app/config"))
     data_dir = Path(os.getenv("GITHUB_WATCH_DATA_DIR", "/data"))
-    ollama_base = os.getenv("OLLAMA_BASE_URL", "").strip()
-    if not ollama_base:
-        ollama_base = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434").strip()
+    ollama_base = _resolve_ollama_base_url()
     return Settings(
         github_token=os.getenv("GITHUB_TOKEN", "").strip(),
         github_api_base_url=os.getenv("GITHUB_API_BASE_URL", "https://api.github.com").strip(),

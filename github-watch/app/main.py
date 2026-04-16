@@ -26,7 +26,11 @@ def _state_key(domain: str, repo_name: str) -> str:
 
 
 def _resolve_since(state: dict[str, str], key: str, default_since_text: str) -> str:
-    return state.get(key, default_since_text)
+    last_fetched = state.get(key)
+    if not last_fetched:
+        return default_since_text
+    # Move one second forward to avoid boundary re-fetch overlap.
+    return to_iso(from_iso(last_fetched) + dt.timedelta(seconds=1))
 
 
 def healthcheck() -> None:

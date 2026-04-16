@@ -1,0 +1,87 @@
+{
+  "repo": "huggingface/diffusers",
+  "domain": "image-processing",
+  "group": "图像增强组",
+  "fetched_at": "2026-04-16T14:49:17Z",
+  "time_range": {
+    "start": "2026-04-16T14:09:41Z",
+    "end": "2026-04-16T14:49:17Z"
+  },
+  "commits": [],
+  "pull_requests": [
+    {
+      "id": 3477181981,
+      "number": 13379,
+      "title": "fix(qwen): fix CFG failing when passing neg prompt embeds with none mask",
+      "message": "# What does this PR do?\r\n\r\n<!--\r\nCongratulations! You've made it this far! You're not quite done yet though.\r\n\r\nOnce merged, your PR is going to appear in the release notes with the title you set, so make sure it's a great title that fully reflects the extent of your awesome contribution.\r\n\r\nThen, please replace this with a description of the change and which issue is fixed (if applicable). Please also include relevant motivation and context. List any dependencies (if any) that are required for this change.\r\n\r\nOnce you're done, someone will review your PR shortly (see the section \"Who can review?\" below to tag some potential reviewers). They may suggest changes to make the code even better. If no one reviewed your PR after a week has passed, don't hesitate to post a new comment @-mentioning the same persons---sometimes notifications get lost.\r\n-->\r\n\r\n<!-- Remove if not applicable -->\r\n\r\nFixes #13377\r\n\r\nThis PR fixes a bug in `QwenImagePipeline` and `QwenImageEditPipeline` where Classifier-Free Guidance (CFG) is incorrectly disabled when users manually pass `negative_prompt_embeds` alongside a `None` mask.\r\n\r\n**Root cause:**\r\nThe `encode_prompt` method naturally optimizes an all-ones `prompt_embeds_mask` by converting and returning it as `None`. However, the `has_neg_prompt` condition in the `__call__` method strictly required `negative_prompt_embeds_mask is not None` to activate CFG. This logical mismatch caused `do_true_cfg` to evaluate to `False` even when valid negative embeddings were provided. \r\n\r\n**Changes:**\r\n- Relaxed the `has_neg_prompt` condition. \r\n- It now correctly evaluates `has_neg_prompt` to `True` as long as `negative_prompt_embeds is not None`, since a `None` mask simply implies that no padding/masking is required.\r\n\r\n\r\n## Before submitting\r\n- [ ] This PR fixes a typo or improves the docs (you can dismiss the other checks if that's the case).\r\n- [x] Did you read the [contributor guideline](https://github.com/huggingface/diffusers/blob/main/CONTRIBUTING.md)?\r\n- [x] Did you read our [philosophy doc](https://github.com/huggingface/diffusers/blob/main/PHILOSOPHY.md) (important for complex PRs)?\r\n- [x] Was this discussed/approved via a GitHub issue or the [forum](https://discuss.huggingface.co/c/discussion-related-to-httpsgithubcomhuggingfacediffusers/63)? https://github.com/huggingface/diffusers/issues/13377.\r\n- [ ] Did you make sure to update the documentation with your changes? Here are the\r\n      [documentation guidelines](https://github.com/huggingface/diffusers/tree/main/docs), and\r\n      [here are tips on formatting docstrings](https://github.com/huggingface/diffusers/tree/main/docs#writing-source-documentation).\r\n- [ ] Did you write any new necessary tests?\r\n\r\n\r\n## Who can review?\r\n\r\n@asomoza @yiyixuxu \r\n\r\n<!-- Your PR will be replied to more quickly if you can figure out the right person to tag with @.\r\n\r\n If you know how to use git blame, that is the easiest way, otherwise, here is a rough guide of **who to tag**.\r\n Please tag fewer than 3 people.\r\n\r\nCore library:\r\n\r\n- Schedulers: @yiyixuxu\r\n- Pipelines and pipeline callbacks: @yiyixuxu and @asomoza\r\n- Training examples: @sayakpaul\r\n- Docs: @stevhliu and @sayakpaul\r\n- JAX and MPS: @pcuenca\r\n- Audio: @sanchit-gandhi\r\n- General functionalities: @sayakpaul @yiyixuxu @DN6\r\n\r\nIntegrations:\r\n\r\n- deepspeed: HF Trainer/Accelerate: @SunMarc\r\n- PEFT: @sayakpaul @BenjaminBossan\r\n\r\nHF projects:\r\n\r\n- accelerate: [different repo](https://github.com/huggingface/accelerate)\r\n- datasets: [different repo](https://github.com/huggingface/datasets)\r\n- transformers: [different repo](https://github.com/huggingface/transformers)\r\n- safetensors: [different repo](https://github.com/huggingface/safetensors)\r\n\r\n-->\r\n",
+      "author": "Sunhill666",
+      "created_at": "2026-04-01T13:12:53Z",
+      "updated_at": "2026-04-16T14:48:08Z",
+      "url": "https://github.com/huggingface/diffusers/pull/13379",
+      "labels": [
+        "tests",
+        "size/L",
+        "modular-pipelines",
+        "pipelines"
+      ],
+      "changed_files": [
+        "src/diffusers/modular_pipelines/qwenimage/encoders.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_controlnet.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_controlnet_inpaint.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_edit.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_edit_inpaint.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_edit_plus.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_img2img.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_inpaint.py",
+        "src/diffusers/pipelines/qwenimage/pipeline_qwenimage_layered.py",
+        "tests/pipelines/qwenimage/test_qwenimage.py",
+        "tests/pipelines/qwenimage/test_qwenimage_controlnet.py",
+        "tests/pipelines/qwenimage/test_qwenimage_edit.py",
+        "tests/pipelines/qwenimage/test_qwenimage_edit_plus.py",
+        "tests/pipelines/qwenimage/test_qwenimage_img2img.py",
+        "tests/pipelines/qwenimage/test_qwenimage_inpaint.py"
+      ],
+      "summary_text": "fix(qwen): fix CFG failing when passing neg prompt embeds with none mask\n# What does this PR do?\r\n\r\n<!--\r\nCongratulations! You've made it this far! You're not quite done yet though.\r\n\r\nOnce merged, your PR is going to appear in the release notes with the title you set, so make sure it's a great title that fully reflects the extent of your awesome contribution.\r\n\r\nThen, please replace this with a description of the change and which issue is fixed (if applicable). Please also include relevant motivation and context. List any dependencies (if any) that are required for this change.\r\n\r\nOnce you're done, someone will review your PR shortly (see the section \"Who can review?\" below to tag some potential reviewers). They may suggest changes to make the code even better. If no one reviewed your PR after a week has passed, don't hesitate to post a new comment @-mentioning the same persons---sometimes notifications get lost.\r\n-->\r\n\r\n<!-- Remove if not applicable -->\r\n\r\nFixes #13377\r\n\r\nThis PR fixes a bug in `QwenImagePipeline` and `QwenImageEditPipeline` where Classifier-Free Guidance (CFG) is incorrectly disabled when users manually pass `negative_prompt_embeds` alongside a `None` mask.\r\n\r\n**Root cause:**\r\nThe `encode_prompt` method naturally optimizes an all-ones `prompt_embeds_mask` by converting and returning it as `None`. However, the `has_neg_prompt` condition in the `__call__` method strictly required `negative_prompt_embeds_mask is not None` to activate CFG. This logical mismatch caused `do_true_cfg` to evaluate to `False` even when valid negative embeddings were provided. \r\n\r\n**Changes:**\r\n- Relaxed the `has_neg_prompt` condition. \r\n- It now correctly evaluates `has_neg_prompt` to `True` as long as `negative_prompt_embeds is not None`, since a `None` mask simply implies that no padding/masking is required.\r\n\r\n\r\n## Before submitting\r\n- [ ] This PR fixes a typo or improves the docs (you can dismiss the other checks if that's the case).\r\n- [x] Did you read the [contributor guideline](https://github.com/huggingface/diffusers/blob/main/CONTRIBUTING.md)?\r\n- [x] Did you read our [philosophy doc](https://github.com/huggingface/diffusers/blob/main/PHILOSOPHY.md) (important for complex PRs)?\r\n- [x] Was this discussed/approved via a GitHub issue or the [forum](https://discuss.huggingface.co/c/discussion-related-to-httpsgithubcomhuggingfacediffusers/63)? https://github.com/huggingface/diffusers/issues/13377.\r\n- [ ] Did you make sure to update the documentation with your changes? Here are the\r\n      [documentation guidelines](https://github.com/huggingface/diffusers/tree/main/docs), and\r\n      [here are tips on formatting docstrings](https://github.com/huggingface/diffusers/tree/main/docs#writing-source-documentation).\r\n- [ ] Did you write any new necessary tests?\r\n\r\n\r\n## Who can review?\r\n\r\n@asomoza @yiyixuxu \r\n\r\n<!-- Your PR will be replied to more quickly if you can figure out the right person to tag with @.\r\n\r\n If you know how to use git blame, that is the easiest way, otherwise, here is a rough guide of **who to tag**.\r\n Please tag fewer than 3 people.\r\n\r\nCore library:\r\n\r\n- Schedulers: @yiyixuxu\r\n- Pipelines and pipeline callbacks: @yiyixuxu and @asomoza\r\n- Training examples: @sayakpaul\r\n- Docs: @stevhliu and @sayakpaul\r\n- JAX and MPS: @pcuenca\r\n- Audio: @sanchit-gandhi\r\n- General functionalities: @sayakpaul @yiyixuxu @DN6\r\n\r\nIntegrations:\r\n\r\n- deepspeed: HF Trainer/Accelerate: @SunMarc\r\n- PEFT: @sayakpaul @BenjaminBossan\r\n\r\nHF projects:\r\n\r\n- accelerate: [different repo](https://github.com/huggingface/accelerate)\r\n- datasets: [different repo](https://github.com/huggingface/datasets)\r\n- transformers: [different repo](https://github.com/huggingface/transformers)\r\n- safetensors: [different repo](https://github.com/huggingface/safetensors)\r\n\r\n-->",
+      "doc_id": "huggingface/diffusers:pull_request:3477181981",
+      "metadata": {
+        "repo": "huggingface/diffusers",
+        "domain": "image-processing",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/huggingface/diffusers/pull/13379"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3441028249,
+      "number": 13325,
+      "title": "[flux.2 LoRA] make lora training compatible with flux.2 klein kv",
+      "message": "adds a flux.2 klein kv training script, with additional general changes that can be propagated to other lora scripts as well: \r\n\r\n- [x] **Default aspect ratio buckets** - uses preset aspect ratio buckets to avoid needing to pass them manually. \r\n\r\n- [x] **`--caption_dropout_rate`** - Randomly replaces prompts with empty strings at the given rate (default 0.05). Forces the model to learn from visual signal alone on some steps to improve robustness.\r\n\r\n- [x] **`--shift_timesteps`** - resolution-adaptive timestep sampling. Samples from sigmoid distribution then warps with `t' = (t·μ)/(1+(μ-1)·t)` where μ scales with latent sequence length. higher resolution gets more high-noise training. default behaviour in popular trainers like ai-toolkit and khoya.\r\n\r\n- [x] **Cache keying fix** - latent/prompt caches bug fixed.\r\n\r\n- [ ] **Multiple conditions support** - allows for multiple image conditions per example. \r\n\r\n",
+      "author": "linoytsaban",
+      "created_at": "2026-03-24T18:41:22Z",
+      "updated_at": "2026-04-16T14:22:00Z",
+      "url": "https://github.com/huggingface/diffusers/pull/13325",
+      "labels": [
+        "size/L",
+        "pipelines",
+        "examples"
+      ],
+      "changed_files": [
+        "examples/dreambooth/train_dreambooth_lora_flux2_klein_kv_img2img.py",
+        "src/diffusers/pipelines/flux2/pipeline_flux2_klein_kv.py"
+      ],
+      "summary_text": "[flux.2 LoRA] make lora training compatible with flux.2 klein kv\nadds a flux.2 klein kv training script, with additional general changes that can be propagated to other lora scripts as well: \r\n\r\n- [x] **Default aspect ratio buckets** - uses preset aspect ratio buckets to avoid needing to pass them manually. \r\n\r\n- [x] **`--caption_dropout_rate`** - Randomly replaces prompts with empty strings at the given rate (default 0.05). Forces the model to learn from visual signal alone on some steps to improve robustness.\r\n\r\n- [x] **`--shift_timesteps`** - resolution-adaptive timestep sampling. Samples from sigmoid distribution then warps with `t' = (t·μ)/(1+(μ-1)·t)` where μ scales with latent sequence length. higher resolution gets more high-noise training. default behaviour in popular trainers like ai-toolkit and khoya.\r\n\r\n- [x] **Cache keying fix** - latent/prompt caches bug fixed.\r\n\r\n- [ ] **Multiple conditions support** - allows for multiple image conditions per example.",
+      "doc_id": "huggingface/diffusers:pull_request:3441028249",
+      "metadata": {
+        "repo": "huggingface/diffusers",
+        "domain": "image-processing",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/huggingface/diffusers/pull/13325"
+      },
+      "chunk_source": "full_text_v1"
+    }
+  ],
+  "issues": [],
+  "errors": [],
+  "error": null
+}

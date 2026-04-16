@@ -25,8 +25,8 @@
 ## exporter 状态
 
 - `markdown_exporter.py`: 实际使用
-- `qdrant_exporter.py`: stub，占位，不写入远端
-- `training_exporter.py`: stub，占位，先生成 placeholder
+- `qdrant_exporter.py`: **stub**，只建目录+日志，不写远端 Qdrant
+- `training_exporter.py`: **stub**，只确保 `placeholder.jsonl` 存在
 
 ## 容错策略
 
@@ -40,3 +40,12 @@
 ```powershell
 docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml run --rm github-watch python -m app.main
 ```
+
+## Ollama Base URL 自动判定
+
+- 优先使用 `OLLAMA_BASE_URL`
+- 若为空，回退 `OLLAMA_HOST`（兼容历史配置）
+- 若都为空，自动判定运行环境：
+  - 宿主机直跑默认优先 `http://127.0.0.1:11434`
+  - 容器内运行默认优先 `http://host.docker.internal:11434`
+- 启动时会做短超时可达性探测；若都不可达，仍返回环境对应的确定性兜底地址

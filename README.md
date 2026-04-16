@@ -64,6 +64,9 @@ Copy-Item .\compose\.env.example .\compose\.env
 - `POSTGRES_PASSWORD`
 - `N8N_BASIC_AUTH_PASSWORD`
 
+> Ollama 地址支持自动判定：当 `OLLAMA_BASE_URL` 与 `OLLAMA_HOST` 都未设置时，
+> `github-watch` 会自动区分“宿主机直跑”与“容器内运行”并选择默认地址（并带可达性兜底）。
+
 ## 宿主机 Ollama 怎么启动
 
 ```powershell
@@ -109,6 +112,8 @@ docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml run --r
 docker compose --env-file E:\aiauto\compose\.env -f E:\aiauto\compose\docker-compose.yml run --rm github-watch python -m app.main
 ```
 
+完整任务计划程序配置示例见：`WINDOWS_TASK_SCHEDULER_GITHUB_WATCH.md`
+
 ## 如何迁移到新电脑
 
 1. 安装 Docker Desktop + WSL2 + Ollama
@@ -136,10 +141,14 @@ docker compose --env-file E:\aiauto\compose\.env -f E:\aiauto\compose\docker-com
 
 ## 当前哪些 exporter 只是预留 stub
 
-- `github-watch/app/exporters/qdrant_exporter.py`
-- `github-watch/app/exporters/training_exporter.py`
+- `github-watch/app/exporters/qdrant_exporter.py`（stub：仅创建目录并记录日志，不写入远端 Qdrant）
+- `github-watch/app/exporters/training_exporter.py`（stub：仅保证 `placeholder.jsonl` 存在）
 
 当前只有 `markdown_exporter.py` 在实际输出链路中生效。
+
+## 最小验收清单
+
+启动后最小检查项（目录、日报文件、服务地址）见：`ACCEPTANCE_CHECKLIST.md`
 
 ## 容错说明
 

@@ -1,0 +1,151 @@
+{
+  "repo": "qdrant/qdrant",
+  "domain": "infra",
+  "group": "服务器与运维组",
+  "fetched_at": "2026-04-16T14:49:17Z",
+  "time_range": {
+    "start": "2026-04-16T14:09:41Z",
+    "end": "2026-04-16T14:49:17Z"
+  },
+  "commits": [],
+  "pull_requests": [
+    {
+      "id": 3539631951,
+      "number": 8693,
+      "title": "Make subgraph_connectivity deterministic",
+      "message": "No need to create a new `rand::rng();` as the caller as one at hand to ensure determinism.",
+      "author": "agourlay",
+      "created_at": "2026-04-16T13:24:18Z",
+      "updated_at": "2026-04-16T14:47:49Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8693",
+      "labels": [],
+      "changed_files": [
+        "lib/segment/src/index/hnsw_index/graph_layers_builder.rs",
+        "lib/segment/src/index/hnsw_index/hnsw.rs"
+      ],
+      "summary_text": "Make subgraph_connectivity deterministic\nNo need to create a new `rand::rng();` as the caller as one at hand to ensure determinism.",
+      "doc_id": "qdrant/qdrant:pull_request:3539631951",
+      "metadata": {
+        "repo": "qdrant/qdrant",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/qdrant/qdrant/pull/8693"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3455821206,
+      "number": 8522,
+      "title": "test: add failing tests for non-idempotent resharding consensus ops",
+      "message": "## Summary\n\n- Adds 6 unit tests proving that resharding operations (`check_abort_resharding`, `commit_read_hashring`, `commit_write_hashring`, `check_finish_resharding`) return `BadRequest` errors when re-applied or when local state diverges between peers\n- Includes a divergence simulation test with two `ShardHolder` instances showing how Peer B's `BadRequest` error gets silently swallowed by `apply_entries`, causing permanent state divergence\n- **All 6 tests intentionally fail on `dev`** to demonstrate the bug; the fix PR stacked on top makes them pass\n\n## The bug\n\n`apply_entries` in `consensus_manager.rs` silently swallows all non-`ServiceError` results. Resharding validation returns `CollectionError::bad_request` which maps to `StorageError::BadRequest` (not `ServiceError`). If a peer's local state diverges for any reason (crash during partial apply, prior swallowed error), the same committed Raft entry returns `BadRequest` on that peer while succeeding on others — the error is silently swallowed, and resharding state permanently diverges despite identical consensus term/commit.\n\n## Test plan\n\nThese tests are expected to fail on this branch. The stacked fix PR will make them pass.\n\n\nMade with [Cursor](https://cursor.com)",
+      "author": "qdrant-cloud-bot",
+      "created_at": "2026-03-27T08:46:49Z",
+      "updated_at": "2026-04-16T14:47:27Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8522",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/collection/resharding.rs",
+        "lib/collection/src/shards/shard_holder/resharding.rs",
+        "tests/consensus_tests/test_resharding.py"
+      ],
+      "summary_text": "test: add failing tests for non-idempotent resharding consensus ops\n## Summary\n\n- Adds 6 unit tests proving that resharding operations (`check_abort_resharding`, `commit_read_hashring`, `commit_write_hashring`, `check_finish_resharding`) return `BadRequest` errors when re-applied or when local state diverges between peers\n- Includes a divergence simulation test with two `ShardHolder` instances showing how Peer B's `BadRequest` error gets silently swallowed by `apply_entries`, causing permanent state divergence\n- **All 6 tests intentionally fail on `dev`** to demonstrate the bug; the fix PR stacked on top makes them pass\n\n## The bug\n\n`apply_entries` in `consensus_manager.rs` silently swallows all non-`ServiceError` results. Resharding validation returns `CollectionError::bad_request` which maps to `StorageError::BadRequest` (not `ServiceError`). If a peer's local state diverges for any reason (crash during partial apply, prior swallowed error), the same committed Raft entry returns `BadRequest` on that peer while succeeding on others — the error is silently swallowed, and resharding state permanently diverges despite identical consensus term/commit.\n\n## Test plan\n\nThese tests are expected to fail on this branch. The stacked fix PR will make them pass.\n\n\nMade with [Cursor](https://cursor.com)",
+      "doc_id": "qdrant/qdrant:pull_request:3455821206",
+      "metadata": {
+        "repo": "qdrant/qdrant",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/qdrant/qdrant/pull/8522"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 3539647169,
+      "number": 8695,
+      "title": "Fix clippy warnings for Rust 1.95",
+      "message": "No logic changes. Only resolves clippy warnings for Rust 1.95.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?",
+      "author": "timvisee",
+      "created_at": "2026-04-16T13:27:39Z",
+      "updated_at": "2026-04-16T14:44:23Z",
+      "url": "https://github.com/qdrant/qdrant/pull/8695",
+      "labels": [],
+      "changed_files": [
+        "lib/collection/src/collection/distance_matrix.rs",
+        "lib/collection/src/collection/query.rs",
+        "lib/collection/src/collection/search.rs",
+        "lib/collection/src/collection_manager/segments_searcher.rs",
+        "lib/collection/src/grouping/aggregator.rs",
+        "lib/collection/src/shards/local_shard/scroll.rs",
+        "lib/collection/src/shards/resolve.rs",
+        "lib/gridstore/benches/real_data_bench.rs",
+        "lib/quantization/src/encoded_vectors_u8.rs",
+        "lib/segment/benches/boolean_filtering.rs",
+        "lib/segment/benches/conditional_search.rs",
+        "lib/segment/src/index/query_estimator.rs",
+        "lib/shard/src/segment_holder/flush.rs",
+        "lib/sparse/src/index/inverted_index/inverted_index_ram.rs",
+        "lib/sparse/src/index/inverted_index/inverted_index_ram_builder.rs",
+        "lib/storage/src/content_manager/snapshots/recover.rs",
+        "lib/wal/src/lib.rs"
+      ],
+      "summary_text": "Fix clippy warnings for Rust 1.95\nNo logic changes. Only resolves clippy warnings for Rust 1.95.\r\n\r\n### All Submissions:\r\n\r\n* [x] Contributions should target the `dev` branch. Did you create your branch from `dev`?\r\n* [x] Have you followed the guidelines in our Contributing document?\r\n* [x] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?",
+      "doc_id": "qdrant/qdrant:pull_request:3539647169",
+      "metadata": {
+        "repo": "qdrant/qdrant",
+        "domain": "infra",
+        "event_type": "pull_request",
+        "source_url": "https://github.com/qdrant/qdrant/pull/8695"
+      },
+      "chunk_source": "full_text_v1"
+    }
+  ],
+  "issues": [
+    {
+      "id": 4273017859,
+      "number": 8688,
+      "title": "[Bug]: Cosine similarity score strictly exceeds upper bound of 1.0 for identical vectors",
+      "message": "<!--- Tell us what happens instead of the expected behavior -->\nWhen using the `COSINE` distance metric, searching for a vector that is identical to an inserted vector occasionally returns a similarity score strictly greater than `1.0` (e.g., `1.0000001` or similar).\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Create a collection using `Distance.COSINE`.\n2. Generate a random `float32` vector array (e.g. 128 dimensions).\n3. Upsert this point into the collection.\n4. Query the collection using `client.search` with the exact same vector.\n5. In certain cases, the returned score will exceed the maximum bound of `1.0`.\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nHere is a minimal reproducible Python script (`qdrant-client`) that loops until the bug is triggered (usually within a few iterations):\n\n```python\nfrom qdrant_client import QdrantClient, models\nimport numpy as np\n\nclient = QdrantClient(url=\"http://localhost:6333\")\n\ncollection_name = \"test_cosine_bound\"\n\n# Ensure clean state\nif client.collection_exists(collection_name):\n    client.delete_collection(collection_name)\n\n# Create collection with Cosine metric\nclient.create_collection(\n    collection_name=collection_name,\n    vectors_config=models.VectorParams(\n        size=128, \n        distance=models.Distance.COSINE\n    ),\n)\n\nbug_reproduced = False\nfor i in range(100):\n    # Generate a random vector\n    vector = np.random.rand(128).tolist()\n\n    # Insert the point\n    client.upsert(\n        collection_name=collection_name,\n        points=[models.PointStruct(id=1, vector=vector)],\n    )\n\n    # Search with the exact same vector (should yield score = 1.0)\n    search_result = client.search(\n        collection_name=collection_name,\n        query_vector=vector,\n        limit=1,\n        with_payload=True,\n    )\n\n    # Check the score\n    score = search_result[0].score\n\n    # Verify the violation\n    if score > 1.0:\n        print(f\"BUG REPRODUCED! Score: {score}\")\n        bug_reproduced = True\n        break\n\nif not bug_reproduced:\n    print(\"Bug not reproduced or fixed.\")\n```\n\n\n## Expected Behavior\n<!--- Tell us what should happen -->\nThe cosine similarity score should be mathematically bounded between `-1.0` and `1.0`. When comparing a vector to itself, the score should be exactly `1.0` and never exceed this theoretical upper bound.\n\n## Possible Solution\n<!--- Not obligatory, but suggest a fix/reason for the bug, -->\nThis is a floating-point precision issue. Explicitly clamping the output of the dot product (after normalization) to `1.0` before returning it as the score will resolve the issue.\n\n## Context (Environment)\n<!--- How has this issue affected you? What are you trying to accomplish? -->\n<!--- Providing context helps us come up with a solution that is most useful in the real world -->\n* **Qdrant Version:** 1.17.1 (Docker Standalone)\n* **Client:** `qdrant-client` (Python)\n* **Distance Metric:** `COSINE`\n\nWe are building a validation framework that strictly enforces the bounds of distance metrics. A similarity score exceeding `1.0` causes validation assertions and boundary checks in downstream systems to fail unexpectedly.\n\n## Detailed Description\n<!--- Provide a detailed description of the change or addition you are proposing -->\nThis is likely caused by floating-point arithmetic precision limits (`f32`) during the dot product calculation of normalized vectors in the core engine. While the theoretical maximum of a cosine similarity is `1.0`, floating-point inaccuracies can cause the result to slightly exceed `1.0` (e.g. `1.0000001192092896`). \n\n## Possible Implementation\n<!--- Not obligatory, but suggest an idea for implementing addition or change -->\nA simple and effective fix would be to explicitly clamp the cosine similarity score to a maximum of `1.0` before returning the result to the client.\n\nFor example, in the Rust core logic where the distance is computed and converted to a score:\n```rust\n// Clamp to valid range\nlet score = computed_score.min(1.0).max(-1.0); \n```",
+      "author": "yihui504",
+      "created_at": "2026-04-16T03:14:22Z",
+      "updated_at": "2026-04-16T14:19:33Z",
+      "url": "https://github.com/qdrant/qdrant/issues/8688",
+      "labels": [
+        "bug"
+      ],
+      "changed_files": [],
+      "summary_text": "[Bug]: Cosine similarity score strictly exceeds upper bound of 1.0 for identical vectors\n<!--- Tell us what happens instead of the expected behavior -->\nWhen using the `COSINE` distance metric, searching for a vector that is identical to an inserted vector occasionally returns a similarity score strictly greater than `1.0` (e.g., `1.0000001` or similar).\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Create a collection using `Distance.COSINE`.\n2. Generate a random `float32` vector array (e.g. 128 dimensions).\n3. Upsert this point into the collection.\n4. Query the collection using `client.search` with the exact same vector.\n5. In certain cases, the returned score will exceed the maximum bound of `1.0`.\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nHere is a minimal reproducible Python script (`qdrant-client`) that loops until the bug is triggered (usually within a few iterations):\n\n```python\nfrom qdrant_client import QdrantClient, models\nimport numpy as np\n\nclient = QdrantClient(url=\"http://localhost:6333\")\n\ncollection_name = \"test_cosine_bound\"\n\n# Ensure clean state\nif client.collection_exists(collection_name):\n    client.delete_collection(collection_name)\n\n# Create collection with Cosine metric\nclient.create_collection(\n    collection_name=collection_name,\n    vectors_config=models.VectorParams(\n        size=128, \n        distance=models.Distance.COSINE\n    ),\n)\n\nbug_reproduced = False\nfor i in range(100):\n    # Generate a random vector\n    vector = np.random.rand(128).tolist()\n\n    # Insert the point\n    client.upsert(\n        collection_name=collection_name,\n        points=[models.PointStruct(id=1, vector=vector)],\n    )\n\n    # Search with the exact same vector (should yield score = 1.0)\n    search_result = client.search(\n        collection_name=collection_name,\n        query_vector=vector,\n        limit=1,\n        with_payload=True,\n    )\n\n    # Check the score\n    score = search_result[0].score\n\n    # Verify the violation\n    if score > 1.0:\n        print(f\"BUG REPRODUCED! Score: {score}\")\n        bug_reproduced = True\n        break\n\nif not bug_reproduced:\n    print(\"Bug not reproduced or fixed.\")\n```\n\n\n## Expected Behavior\n<!--- Tell us what should happen -->\nThe cosine similarity score should be mathematically bounded between `-1.0` and `1.0`. When comparing a vector to itself, the score should be exactly `1.0` and never exceed this theoretical upper bound.\n\n## Possible Solution\n<!--- Not obligatory, but suggest a fix/reason for the bug, -->\nThis is a floating-point precision issue. Explicitly clamping the output of the dot product (after normalization) to `1.0` before returning it as the score will resolve the issue.\n\n## Context (Environment)\n<!--- How has this issue affected you? What are you trying to accomplish? -->\n<!--- Providing context helps us come up with a solution that is most useful in the real world -->\n* **Qdrant Version:** 1.17.1 (Docker Standalone)\n* **Client:** `qdrant-client` (Python)\n* **Distance Metric:** `COSINE`\n\nWe are building a validation framework that strictly enforces the bounds of distance metrics. A similarity score exceeding `1.0` causes validation assertions and boundary checks in downstream systems to fail unexpectedly.\n\n## Detailed Description\n<!--- Provide a detailed description of the change or addition you are proposing -->\nThis is likely caused by floating-point arithmetic precision limits (`f32`) during the dot product calculation of normalized vectors in the core engine. While the theoretical maximum of a cosine similarity is `1.0`, floating-point inaccuracies can cause the result to slightly exceed `1.0` (e.g. `1.0000001192092896`). \n\n## Possible Implementation\n<!--- Not obligatory, but suggest an idea for implementing addition or change -->\nA simple and effective fix would be to explicitly clamp the cosine similarity score to a maximum of `1.0` before returning the result to the client.\n\nFor example, in the Rust core logic where the distance is computed and converted to a score:\n```rust\n// Clamp to valid range\nlet score = computed_score.min(1.0).max(-1.0); \n```",
+      "doc_id": "qdrant/qdrant:issue:4273017859",
+      "metadata": {
+        "repo": "qdrant/qdrant",
+        "domain": "infra",
+        "event_type": "issue",
+        "source_url": "https://github.com/qdrant/qdrant/issues/8688"
+      },
+      "chunk_source": "full_text_v1"
+    },
+    {
+      "id": 4276224276,
+      "number": 8696,
+      "title": "Running qdrant.exe causes folders to be created at various places depending on where qdrant.exe is run",
+      "message": "<!--- Provide a general summary of the issue in the Title above -->\nDue to licensing requirements, I am not allowed to use Docker (Desktop) at my workplace and it has lead to me using the executable versions of Qdrant that are present within the ZIP files. The executable works as expected, but I have noticed that when I am calling qdrant.exe, then you create different data path directories at different places depending on where you make the call to qdrant.exe and when you let e.g. Kilo Code to utilize the running Qdrant instance for local codebase indexing, it causes re-indexing if one would run the qdrant.exe at different locations on the machine due to e.g. Kilo Code's detection of present chunks/embeddings in those surrounding folders.\n\n## Current Behavior\n<!--- Tell us what happens instead of the expected behavior -->\nInstead of the Qdrant instance pointing to a specific location where data is stored on the system, it will just create data directories at the same location where the qdrant.exe is run.\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Download any ZIP file\n2. Unzip the file and get access to qdrant.exe\n3. Run qdrant.exe at one place and observe folders being created around qdrant.exe\n4. Run qdrant.exe at another location and new folders will be created\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nN/A\n\n## Expected Behavior\nSee above.\n\n## Possible Solution\nI have developed the following installation Powershell script to make the path of directories static on one's machine and it won't matter from where in a terminal you run the qdrant instance, it will eliminate the risk of duplicate data directories being created:\n\n```powershell\n# =====================================================\n# Qdrant installer (Windows, PATH wrapper in ~/qdrant/bin)\n# =====================================================\n\n# -------------------------------\n# Configuration\n# -------------------------------\n$QdrantDir = Join-Path $HOME \"qdrant\"\n$QdrantBin = Join-Path $QdrantDir \"bin\"\n\n$QdrantUrl = \"https://github.com/qdrant/qdrant/releases/download/v1.16.3/qdrant-x86_64-pc-windows-msvc.zip\"\n$ZipPath   = Join-Path $QdrantDir \"qdrant.zip\"\n\n$CmdPath   = Join-Path $QdrantBin \"qdrant.cmd\"\n\nWrite-Host \"=== Qdrant installation started ===\" -ForegroundColor Cyan\nWrite-Host \"Install dir : $QdrantDir\"\nWrite-Host \"Bin dir     : $QdrantBin\"\nWrite-Host \"\"\n\n# -------------------------------\n# 1. Install Qdrant\n# -------------------------------\nWrite-Host \"[1/4] Preparing installation directory...\"\nRemove-Item $QdrantDir -Recurse -Force -ErrorAction SilentlyContinue\nNew-Item -ItemType Directory -Path $QdrantDir -Force | Out-Null\nNew-Item -ItemType Directory -Path $QdrantBin -Force | Out-Null\n\nWrite-Host \"[2/4] Downloading Qdrant...\"\nInvoke-WebRequest -Uri $QdrantUrl -OutFile $ZipPath\n\nWrite-Host \"[3/4] Extracting Qdrant...\"\nExpand-Archive -Path $ZipPath -DestinationPath $QdrantDir -Force\nRemove-Item $ZipPath -Force\n\nif (!(Test-Path (Join-Path $QdrantDir \"qdrant.exe\"))) {\n    Write-Error \"qdrant.exe not found after extraction\"\n    exit 1\n}\n\nWrite-Host \"Qdrant installed at $QdrantDir\"\nWrite-Host \"\"\n\n# -------------------------------\n# 2. Install PATH wrapper (inside qdrant/bin)\n# -------------------------------\nWrite-Host \"[4/4] Creating qdrant.cmd wrapper...\"\n\n@'\n@echo off\nsetlocal\n\nset QDRANT_HOME=%USERPROFILE%\\qdrant\n\nif not exist \"%QDRANT_HOME%\\qdrant.exe\" (\n    echo ERROR: qdrant.exe not found in %QDRANT_HOME%\n    exit /b 1\n)\n\ncd /d \"%QDRANT_HOME%\"\n\"%QDRANT_HOME%\\qdrant.exe\" %*\n\nendlocal\n'@ | Set-Content -Path $CmdPath -Encoding ASCII\n\nWrite-Host \"Wrapper created: $CmdPath\"\n\n# -------------------------------\n# 3. Ensure ~/qdrant/bin is on PATH\n# -------------------------------\n$UserPath = [Environment]::GetEnvironmentVariable(\"Path\", \"User\")\n\nif ($UserPath -notlike \"*$QdrantBin*\") {\n    [Environment]::SetEnvironmentVariable(\n        \"Path\",\n        \"$UserPath;$QdrantBin\",\n        \"User\"\n    )\n    Write-Host \"Added $QdrantBin to user PATH\"\n    Write-Host \"Restart your shell to activate 'qdrant'\"\n} else {\n    Write-Host \"$QdrantBin already present in PATH\"\n}\n\nWrite-Host \"\"\nWrite-Host \"=== Qdrant installation completed successfully ===\" -ForegroundColor Green\nWrite-Host \"Run: qdrant\"\nWrite-Host \"Working directory: $QdrantDir\"\n```\n\n## Context (Environment)\nSee above.\n\n## Detailed Description\nSee above.\n\n## Possible Implementation\nThe above script should work well for Windows machines, but I have not figured out anything similar for Linux/MacOS machines, so I guess this part is pretty much open for further discussion on how we could utilize this script for greater audience and more machines that it could work on.",
+      "author": "sylwester-liljegren",
+      "created_at": "2026-04-16T13:59:50Z",
+      "updated_at": "2026-04-16T14:18:11Z",
+      "url": "https://github.com/qdrant/qdrant/issues/8696",
+      "labels": [
+        "bug"
+      ],
+      "changed_files": [],
+      "summary_text": "Running qdrant.exe causes folders to be created at various places depending on where qdrant.exe is run\n<!--- Provide a general summary of the issue in the Title above -->\nDue to licensing requirements, I am not allowed to use Docker (Desktop) at my workplace and it has lead to me using the executable versions of Qdrant that are present within the ZIP files. The executable works as expected, but I have noticed that when I am calling qdrant.exe, then you create different data path directories at different places depending on where you make the call to qdrant.exe and when you let e.g. Kilo Code to utilize the running Qdrant instance for local codebase indexing, it causes re-indexing if one would run the qdrant.exe at different locations on the machine due to e.g. Kilo Code's detection of present chunks/embeddings in those surrounding folders.\n\n## Current Behavior\n<!--- Tell us what happens instead of the expected behavior -->\nInstead of the Qdrant instance pointing to a specific location where data is stored on the system, it will just create data directories at the same location where the qdrant.exe is run.\n\n## Steps to Reproduce\n<!--- Provide a link to a live example, or an unambiguous set of steps to -->\n<!--- reproduce this bug. Include code to reproduce, if relevant -->\n1. Download any ZIP file\n2. Unzip the file and get access to qdrant.exe\n3. Run qdrant.exe at one place and observe folders being created around qdrant.exe\n4. Run qdrant.exe at another location and new folders will be created\n\n<!--- Please make sure to include the data which could be used to reproduce the problem -->\nN/A\n\n## Expected Behavior\nSee above.\n\n## Possible Solution\nI have developed the following installation Powershell script to make the path of directories static on one's machine and it won't matter from where in a terminal you run the qdrant instance, it will eliminate the risk of duplicate data directories being created:\n\n```powershell\n# =====================================================\n# Qdrant installer (Windows, PATH wrapper in ~/qdrant/bin)\n# =====================================================\n\n# -------------------------------\n# Configuration\n# -------------------------------\n$QdrantDir = Join-Path $HOME \"qdrant\"\n$QdrantBin = Join-Path $QdrantDir \"bin\"\n\n$QdrantUrl = \"https://github.com/qdrant/qdrant/releases/download/v1.16.3/qdrant-x86_64-pc-windows-msvc.zip\"\n$ZipPath   = Join-Path $QdrantDir \"qdrant.zip\"\n\n$CmdPath   = Join-Path $QdrantBin \"qdrant.cmd\"\n\nWrite-Host \"=== Qdrant installation started ===\" -ForegroundColor Cyan\nWrite-Host \"Install dir : $QdrantDir\"\nWrite-Host \"Bin dir     : $QdrantBin\"\nWrite-Host \"\"\n\n# -------------------------------\n# 1. Install Qdrant\n# -------------------------------\nWrite-Host \"[1/4] Preparing installation directory...\"\nRemove-Item $QdrantDir -Recurse -Force -ErrorAction SilentlyContinue\nNew-Item -ItemType Directory -Path $QdrantDir -Force | Out-Null\nNew-Item -ItemType Directory -Path $QdrantBin -Force | Out-Null\n\nWrite-Host \"[2/4] Downloading Qdrant...\"\nInvoke-WebRequest -Uri $QdrantUrl -OutFile $ZipPath\n\nWrite-Host \"[3/4] Extracting Qdrant...\"\nExpand-Archive -Path $ZipPath -DestinationPath $QdrantDir -Force\nRemove-Item $ZipPath -Force\n\nif (!(Test-Path (Join-Path $QdrantDir \"qdrant.exe\"))) {\n    Write-Error \"qdrant.exe not found after extraction\"\n    exit 1\n}\n\nWrite-Host \"Qdrant installed at $QdrantDir\"\nWrite-Host \"\"\n\n# -------------------------------\n# 2. Install PATH wrapper (inside qdrant/bin)\n# -------------------------------\nWrite-Host \"[4/4] Creating qdrant.cmd wrapper...\"\n\n@'\n@echo off\nsetlocal\n\nset QDRANT_HOME=%USERPROFILE%\\qdrant\n\nif not exist \"%QDRANT_HOME%\\qdrant.exe\" (\n    echo ERROR: qdrant.exe not found in %QDRANT_HOME%\n    exit /b 1\n)\n\ncd /d \"%QDRANT_HOME%\"\n\"%QDRANT_HOME%\\qdrant.exe\" %*\n\nendlocal\n'@ | Set-Content -Path $CmdPath -Encoding ASCII\n\nWrite-Host \"Wrapper created: $CmdPath\"\n\n# -------------------------------\n# 3. Ensure ~/qdrant/bin is on PATH\n# -------------------------------\n$UserPath = [Environment]::GetEnvironmentVariable(\"Path\", \"User\")\n\nif ($UserPath -notlike \"*$QdrantBin*\") {\n    [Environment]::SetEnvironmentVariable(\n        \"Path\",\n        \"$UserPath;$QdrantBin\",\n        \"User\"\n    )\n    Write-Host \"Added $QdrantBin to user PATH\"\n    Write-Host \"Restart your shell to activate 'qdrant'\"\n} else {\n    Write-Host \"$QdrantBin already present in PATH\"\n}\n\nWrite-Host \"\"\nWrite-Host \"=== Qdrant installation completed successfully ===\" -ForegroundColor Green\nWrite-Host \"Run: qdrant\"\nWrite-Host \"Working directory: $QdrantDir\"\n```\n\n## Context (Environment)\nSee above.\n\n## Detailed Description\nSee above.\n\n## Possible Implementation\nThe above script should work well for Windows machines, but I have not figured out anything similar for Linux/MacOS machines, so I guess this part is pretty much open for further discussion on how we could utilize this script for greater audience and more machines that it could work on.",
+      "doc_id": "qdrant/qdrant:issue:4276224276",
+      "metadata": {
+        "repo": "qdrant/qdrant",
+        "domain": "infra",
+        "event_type": "issue",
+        "source_url": "https://github.com/qdrant/qdrant/issues/8696"
+      },
+      "chunk_source": "full_text_v1"
+    }
+  ],
+  "errors": [],
+  "error": null
+}
