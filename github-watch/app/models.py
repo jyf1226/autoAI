@@ -50,15 +50,3 @@ class NormalizedRepoData:
             "issues": self.issues,
             "errors": self.errors,
         }
-from dataclasses import dataclass
-
-
-@dataclass(frozen=True)
-class RepoTarget:
-    group: str
-    owner: str
-    repo: str
-
-    @property
-    def full_name(self) -> str:
-        return f"{self.owner}/{self.repo}"
