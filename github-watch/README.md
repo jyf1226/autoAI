@@ -1,39 +1,25 @@
 # github-watch
 
-一个最小可运行的 GitHub 动态日报服务。
+`github-watch` 是本项目的核心自动研究服务，负责抓取 GitHub 更新并生成中文日报。
 
-## 功能
+## 处理流程
 
-1. 读取 `config/repos.yaml`
-2. 拉取最近 24 小时 commits / pull requests / issues
-3. 保存原始 JSON 到 `data/github-watch/raw/`
-4. 保存规范化 JSON 到 `data/github-watch/normalized/`
-5. 调用宿主机 Ollama 生成中文摘要
-6. 输出 Markdown 报告到 `data/github-watch/reports/`
+1. 读取 `config/repos.yaml` 分组仓库配置
+2. 按仓库读取 `data/github-watch/state/fetch_state.json` 计算抓取窗口
+3. 拉取 commits / pull requests / issues
+4. 保存原始 JSON 到 `data/github-watch/raw/`
+5. 规范化为统一结构写入 `data/github-watch/normalized/`
+6. 调用宿主机 Ollama 生成中文摘要（失败自动降级）
+7. 输出 Markdown 到 `data/github-watch/reports/`
+8. 更新 state，避免重复抓取
 
-## 环境变量
+## 容错策略
 
-从 `compose/.env` 注入：
+- 单仓库失败不影响整体流程
+- GitHub API 基础重试与速率限制等待
+- Ollama 调用失败自动切换到无模型摘要模式
 
-- `GITHUB_TOKEN`
-- `GITHUB_API_BASE_URL`
-- `OLLAMA_BASE_URL`
-- `OLLAMA_MODEL`
-- `GITHUB_WATCH_REPOS_FILE`
-- `GITHUB_WATCH_DATA_DIR`
-- `GITHUB_WATCH_POLL_INTERVAL_SECONDS`
-- `GITHUB_WATCH_REQUEST_SLEEP_SECONDS`
+## 后续扩展位
 
-## 本地调试（可选）
-
-在项目根目录执行：
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r .\github-watch\requirements.txt
-$env:GITHUB_TOKEN="你的token"
-$env:GITHUB_WATCH_REPOS_FILE="E:\aiauto\github-watch\config\repos.yaml"
-$env:GITHUB_WATCH_DATA_DIR="E:\aiauto\data\github-watch"
-python -m github-watch.app.main
-```
+- 在 `normalize_events.py` 后增加 `to_qdrant_documents(...)`
+- 在 `main.py` 正常化后插入“写入向量库 / 训练样本导出”步骤

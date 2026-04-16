@@ -89,7 +89,7 @@ services:
       - ai-net
 
   open-webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui:v0.5.7
     container_name: ai-open-webui
     restart: unless-stopped
     env_file:
@@ -140,18 +140,17 @@ services:
       GITHUB_WATCH_DATA_DIR: /data
       GITHUB_WATCH_POLL_INTERVAL_SECONDS: ${GITHUB_WATCH_POLL_INTERVAL_SECONDS}
       GITHUB_WATCH_REQUEST_SLEEP_SECONDS: ${GITHUB_WATCH_REQUEST_SLEEP_SECONDS}
+      GITHUB_WATCH_HTTP_TIMEOUT_SECONDS: ${GITHUB_WATCH_HTTP_TIMEOUT_SECONDS}
+      GITHUB_WATCH_MAX_RETRIES: ${GITHUB_WATCH_MAX_RETRIES}
+      GITHUB_WATCH_LOG_LEVEL: ${GITHUB_WATCH_LOG_LEVEL}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS}
     volumes:
       - ../data/github-watch:/data
-      - ../github-watch/config:/app/config:ro
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      qdrant:
-        condition: service_healthy
+      - ../config:/app/config:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"print('ok')\""]
+      test: ["CMD-SHELL", "python -c \"from app.main import healthcheck; healthcheck()\""]
       interval: 30s
       timeout: 8s
       retries: 5

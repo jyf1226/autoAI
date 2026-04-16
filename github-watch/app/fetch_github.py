@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime as dt
 import logging
 import time
@@ -5,13 +7,24 @@ from typing import Any
 
 import requests
 
+from app.models import RepoTarget
+
 LOGGER = logging.getLogger(__name__)
 
 
 class GitHubClient:
-    def __init__(self, token: str, base_url: str, request_sleep_seconds: float = 1.0) -> None:
+    def __init__(
+        self,
+        token: str,
+        base_url: str,
+        request_sleep_seconds: float = 1.0,
+        timeout_seconds: int = 30,
+        max_retries: int = 3,
+    ) -> None:
         self.base_url = base_url.rstrip("/")
         self.request_sleep_seconds = max(0.0, request_sleep_seconds)
+        self.timeout_seconds = timeout_seconds
+        self.max_retries = max_retries
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -21,52 +34,84 @@ class GitHubClient:
             }
         )
 
-    def _request_with_retry(self, path: str, params: dict[str, Any], max_retries: int = 3) -> list[dict[str, Any]]:
+    def _request_json(self, path: str, params: dict[str, Any]) -> list[dict[str, Any]]:
         url = f"{self.base_url}{path}"
-        for attempt in range(1, max_retries + 1):
+        for attempt in range(1, self.max_retries + 1):
             try:
-                response = self.session.get(url, params=params, timeout=30)
+                response = self.session.get(url, params=params, timeout=self.timeout_seconds)
                 if response.status_code == 403 and response.headers.get("X-RateLimit-Remaining") == "0":
                     reset_ts = int(response.headers.get("X-RateLimit-Reset", "0"))
-                    sleep_seconds = max(5, reset_ts - int(time.time()))
-                    LOGGER.warning("Hit GitHub rate limit, sleeping %s seconds", sleep_seconds)
-                    time.sleep(min(sleep_seconds, 120))
+                    wait_seconds = max(5, reset_ts - int(time.time()))
+                    LOGGER.warning("Rate limit reached, sleep %s seconds", wait_seconds)
+                    time.sleep(min(wait_seconds, 120))
                     continue
                 response.raise_for_status()
+                payload = response.json()
                 time.sleep(self.request_sleep_seconds)
-                return response.json()
+                if isinstance(payload, list):
+                    return payload
+                return []
             except requests.RequestException as exc:
-                LOGGER.warning("GitHub request failed (%s/%s): %s", attempt, max_retries, exc)
-                if attempt == max_retries:
+                LOGGER.warning("GitHub API failed (%s/%s): %s", attempt, self.max_retries, exc)
+                if attempt == self.max_retries:
                     raise
                 time.sleep(2 * attempt)
         return []
 
-    def fetch_recent(self, owner: str, repo: str, since_utc: dt.datetime) -> dict[str, list[dict[str, Any]]]:
-        since_iso = since_utc.replace(microsecond=0).isoformat() + "Z"
-        LOGGER.info("Fetching repo=%s/%s since=%s", owner, repo, since_iso)
-        pulls = self._request_with_retry(
-            f"/repos/{owner}/{repo}/pulls",
-            {"state": "all", "sort": "updated", "direction": "desc", "per_page": 100},
-        )
-        issues = self._request_with_retry(
-            f"/repos/{owner}/{repo}/issues",
-            {"state": "all", "sort": "updated", "direction": "desc", "since": since_iso, "per_page": 100},
-        )
-        commits = self._request_with_retry(
-            f"/repos/{owner}/{repo}/commits",
+    def _fetch_pr_files(self, target: RepoTarget, pr_number: int) -> list[str]:
+        try:
+            files = self._request_json(
+                f"/repos/{target.owner}/{target.repo}/pulls/{pr_number}/files",
+                {"per_page": 100},
+            )
+            return [f.get("filename", "") for f in files if isinstance(f, dict)]
+        except Exception as exc:
+            LOGGER.warning("Fetch PR files failed for %s#%s: %s", target.full_name, pr_number, exc)
+            return []
+
+    def fetch_recent(self, target: RepoTarget, since_utc: dt.datetime, until_utc: dt.datetime) -> dict[str, Any]:
+        since_iso = since_utc.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        until_iso = until_utc.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        LOGGER.info("Fetch %s since=%s", target.full_name, since_iso)
+        commits = self._request_json(
+            f"/repos/{target.owner}/{target.repo}/commits",
             {"since": since_iso, "per_page": 100},
         )
+        pull_requests = self._request_json(
+            f"/repos/{target.owner}/{target.repo}/pulls",
+            {"state": "all", "sort": "updated", "direction": "desc", "per_page": 100},
+        )
+        issues = self._request_json(
+            f"/repos/{target.owner}/{target.repo}/issues",
+            {"state": "all", "sort": "updated", "direction": "desc", "since": since_iso, "per_page": 100},
+        )
 
-        def _is_recent(item: dict[str, Any]) -> bool:
-            updated = item.get("updated_at") or item.get("created_at")
-            if not updated:
+        def _in_range(ts: str | None) -> bool:
+            if not ts:
                 return False
-            updated_dt = dt.datetime.fromisoformat(updated.replace("Z", "+00:00"))
-            return updated_dt >= since_utc
+            moment = dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            return since_utc <= moment <= until_utc
 
-        pulls_recent = [x for x in pulls if _is_recent(x)]
-        issues_recent = [x for x in issues if _is_recent(x) and "pull_request" not in x]
-        commits_recent = commits
+        pulls_recent = []
+        for item in pull_requests:
+            if _in_range(item.get("updated_at") or item.get("created_at")):
+                number = item.get("number")
+                if isinstance(number, int):
+                    item["changed_files"] = self._fetch_pr_files(target, number)
+                pulls_recent.append(item)
 
-        return {"pulls": pulls_recent, "issues": issues_recent, "commits": commits_recent}
+        issues_recent = [
+            item
+            for item in issues
+            if "pull_request" not in item and _in_range(item.get("updated_at") or item.get("created_at"))
+        ]
+
+        return {
+            "repo": target.full_name,
+            "group": target.group,
+            "since": since_iso,
+            "until": until_iso,
+            "commits": commits,
+            "pull_requests": pulls_recent,
+            "issues": issues_recent,
+        }

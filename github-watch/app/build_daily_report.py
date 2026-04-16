@@ -16,40 +16,69 @@ def build_daily_report_markdown(
     lines.append("")
     lines.append(summary_text)
     lines.append("")
-    lines.append("## 数据概览")
+    lines.append("## 分组快照")
     lines.append("")
-    for repo_item in normalized_events:
-        stats = repo_item.get("stats", {})
-        lines.append(
-            f"- {repo_item.get('repo')}: commits={stats.get('commits', 0)}, "
-            f"pulls={stats.get('pulls', 0)}, issues={stats.get('issues', 0)}"
-        )
-    lines.append("")
-    lines.append("## 详细变更")
-    lines.append("")
-    for repo_item in normalized_events:
-        lines.append(f"### {repo_item.get('repo')}")
+
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for item in normalized_events:
+        grouped.setdefault(item.get("group", "未分组"), []).append(item)
+
+    for group_name, repos in grouped.items():
+        lines.append(f"## {group_name}")
         lines.append("")
-        _append_section(lines, "Commits", repo_item.get("commits", []), key_map={"title": "message", "time": "date"})
-        _append_section(lines, "Pull Requests", repo_item.get("pulls", []), key_map={"id": "number", "title": "title", "time": "updated_at"})
-        _append_section(lines, "Issues", repo_item.get("issues", []), key_map={"id": "number", "title": "title", "time": "updated_at"})
+        lines.append("1. 今日有哪些 repo 有更新")
+        active_repos = [x["repo"] for x in repos if _has_updates(x)]
+        if active_repos:
+            for repo_name in active_repos:
+                lines.append(f"- {repo_name}")
+        else:
+            lines.append("- 无显著更新")
+        lines.append("")
+
+        lines.append("2. 核心变化摘要")
+        for repo_item in repos:
+            commit_count = len(repo_item.get("commits", []))
+            pr_count = len(repo_item.get("pull_requests", []))
+            issue_count = len(repo_item.get("issues", []))
+            lines.append(f"- {repo_item.get('repo')}: commits={commit_count}, PR={pr_count}, issues={issue_count}")
+        lines.append("")
+
+        lines.append("3. 哪些改动值得我重点研究")
+        highlights = _highlights(repos)
+        if highlights:
+            for point in highlights:
+                lines.append(f"- {point}")
+        else:
+            lines.append("- 今日无明显高优先级改动")
+        lines.append("")
+
+        lines.append("4. 对我自己项目可能有什么启发")
+        lines.append("- 关注多人联机同步与服务端状态一致性实现细节")
+        lines.append("- 关注 PR/Issue 中的性能与可维护性讨论，作为技术选型参考")
+        lines.append("")
+
     lines.append("")
     return "\n".join(lines)
 
 
-def _append_section(lines: list[str], title: str, items: list[dict[str, Any]], key_map: dict[str, str]) -> None:
-    lines.append(f"#### {title}")
-    if not items:
-        lines.append("")
-        lines.append("- 无")
-        lines.append("")
-        return
-    lines.append("")
-    for item in items:
-        item_id = item.get(key_map.get("id", ""), "")
-        item_title = item.get(key_map["title"], "")
-        item_time = item.get(key_map["time"], "")
-        item_url = item.get("url", "")
-        prefix = f"#{item_id} " if item_id else ""
-        lines.append(f"- {prefix}{item_title} ({item_time}) {item_url}".strip())
-    lines.append("")
+def _has_updates(repo_item: dict[str, Any]) -> bool:
+    return bool(repo_item.get("commits") or repo_item.get("pull_requests") or repo_item.get("issues"))
+
+
+def _highlights(repos: list[dict[str, Any]]) -> list[str]:
+    result: list[str] = []
+    for repo_item in repos:
+        repo = repo_item.get("repo")
+        prs = repo_item.get("pull_requests", [])
+        issues = repo_item.get("issues", [])
+        commits = repo_item.get("commits", [])
+        if prs:
+            top = prs[0]
+            result.append(f"{repo} PR #{top.get('number')} - {top.get('title')}")
+        elif issues:
+            top = issues[0]
+            result.append(f"{repo} Issue #{top.get('number')} - {top.get('title')}")
+        elif commits:
+            top = commits[0]
+            result.append(f"{repo} Commit - {top.get('title')}")
+    return result[:8]
