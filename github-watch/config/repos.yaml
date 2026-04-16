@@ -1,0 +1,5 @@
+repos:
+  - owner: microsoft
+    repo: vscode
+  - owner: docker
+    repo: compose

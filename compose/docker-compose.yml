@@ -1,0 +1,163 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ../data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - ../data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-net
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.4
+    container_name: ai-qdrant
+    restart: unless-stopped
+    volumes:
+      - ../data/qdrant:/qdrant/storage
+    ports:
+      - "${QDRANT_PORT}:6333"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:6333/readyz || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-net
+
+  n8n:
+    image: n8nio/n8n:1.89.2
+    container_name: ai-n8n
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      N8N_HOST: ${N8N_HOST}
+      N8N_PORT: ${N8N_PORT}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      QUEUE_BULL_REDIS_HOST: redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      TZ: ${TZ}
+      GENERIC_TIMEZONE: ${TZ}
+      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+    ports:
+      - "${N8N_PORT}:5678"
+    volumes:
+      - ../data/n8n:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+    networks:
+      - ai-net
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: ai-open-webui
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      WEBUI_AUTH: ${WEBUI_AUTH}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+      VECTOR_DB: qdrant
+      QDRANT_URI: http://qdrant:6333
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      ENABLE_OLLAMA_API: "true"
+    ports:
+      - "${OPENWEBUI_PORT}:8080"
+    volumes:
+      - ../data/openwebui:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:8080/health | grep -q 'ok' || exit 1"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+    networks:
+      - ai-net
+
+  github-watch:
+    build:
+      context: ../github-watch
+    container_name: ai-github-watch
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      TZ: ${TZ}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+      OLLAMA_MODEL: ${OLLAMA_MODEL}
+      GITHUB_WATCH_REPOS_FILE: /app/config/repos.yaml
+      GITHUB_WATCH_DATA_DIR: /data
+      GITHUB_WATCH_POLL_INTERVAL_SECONDS: ${GITHUB_WATCH_POLL_INTERVAL_SECONDS}
+      GITHUB_WATCH_REQUEST_SLEEP_SECONDS: ${GITHUB_WATCH_REQUEST_SLEEP_SECONDS}
+    volumes:
+      - ../data/github-watch:/data
+      - ../github-watch/config:/app/config:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"print('ok')\""]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+    networks:
+      - ai-net
+
+networks:
+  ai-net:
+    driver: bridge
