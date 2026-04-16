@@ -54,6 +54,8 @@ Copy-Item .\compose\.env.example .\compose\.env
 
 2. 编辑 `compose/.env`，至少修改：
    - `GITHUB_TOKEN`
+   - `OLLAMA_BASE_URL`（或保留 `OLLAMA_BASE_URL` 为空并填写 `OLLAMA_HOST`）
+   - `OLLAMA_MODEL`（写本机 `ollama list` 能看到的模型名）
    - `POSTGRES_PASSWORD`
    - `N8N_BASIC_AUTH_PASSWORD`
 
@@ -78,7 +80,7 @@ ollama pull qwen2.5-coder:14b-instruct-q4_K_M
 ## 只单独运行 github-watch
 
 ```powershell
-docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml up -d --build github-watch
+docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml run --rm github-watch python -m app.main
 docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml logs -f github-watch
 ```
 

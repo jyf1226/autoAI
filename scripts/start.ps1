@@ -7,6 +7,12 @@ $composeFile = Join-Path $projectRoot "compose\docker-compose.yml"
 
 Write-Host "Checking docker compose..."
 docker compose version | Out-Null
+try {
+  docker info | Out-Null
+} catch {
+  Write-Error "Docker daemon is not running. Please start Docker Desktop first."
+  exit 1
+}
 
 if (-not (Test-Path $envFile)) {
   Write-Host "compose/.env not found, copying from .env.example"
@@ -25,4 +31,5 @@ Write-Host "  n8n        : http://localhost:5678"
 Write-Host ""
 Write-Host "Next:"
 Write-Host "  - Edit compose/.env and set GITHUB_TOKEN"
+Write-Host "  - Ensure OLLAMA_BASE_URL or OLLAMA_HOST points to host Ollama"
 Write-Host "  - Tail logs: docker compose --env-file compose/.env -f compose/docker-compose.yml logs -f github-watch"

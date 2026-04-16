@@ -19,6 +19,12 @@
 - GitHub API 基础重试与速率限制等待
 - Ollama 调用失败自动切换到无模型摘要模式
 
+## 手动运行（容器）
+
+```powershell
+docker compose --env-file .\compose\.env -f .\compose\docker-compose.yml run --rm github-watch python -m app.main
+```
+
 ## 后续扩展位
 
 - 在 `normalize_events.py` 后增加 `to_qdrant_documents(...)`
